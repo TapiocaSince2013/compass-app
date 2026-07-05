@@ -756,9 +756,9 @@ const PRIOR_WEIGHT=6;   // 事前の疑似カウント総量(弱め)。実デー
    本人のブラウザで開く(送る内容は事前に全文プレビュー)。届いたデータは設置者が
    目視確認(偽データ対策)のうえ HUB_POOL に焼き込み、次版として再配布する。 */
 const HUB={
-  submitFormUrl:"",   // 例: "https://docs.google.com/forms/d/e/XXXX/viewform"(メール収集なし設定)
-  submitEntryId:"",   // 例: "entry.123456789"(データ欄のプレフィルID)
-  feedbackUrl:""      // 例: マシュマロ等の匿名メッセージURL(感想・違和感の受け口)
+  submitFormUrl:"https://docs.google.com/forms/d/e/1FAIpQLSeLhCzp9bTvtINK2o5cEJl_JZsBOgh8bcsK3CD_7I1GNk4Tgw/viewform",
+  submitEntryId:"entry.68450378",
+  feedbackUrl:"https://docs.google.com/forms/d/e/1FAIpQLSeLhCzp9bTvtINK2o5cEJl_JZsBOgh8bcsK3CD_7I1GNk4Tgw/viewform"   // 感想は同フォームの「ひとこと」欄で受ける
 };
 /* 検証済みの提供レコード(設置者が確認して取り込んだ実データ)。次版の配布で全員のNが育つ。
    形式: {biz,rate(ビン下端の代表値),area,tier,drivers,ts,share(任意・5%帯の下端)} */
