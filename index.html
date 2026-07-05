@@ -1,0 +1,1955 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Compass</title>
+<style>
+:root{
+  --bg:#EEF1EC; --panel:#FBFCFA; --ink:#222B27; --ink2:#5F6B64; --ink3:#8A958E;
+  --rail:#27322D; --rail2:#33413A;
+  --sage:#5C7A6B; --sage2:#E2EAE4;
+  --amber:#C08A3E; --amber2:#F0E2CB; --ambertext:#7A571F;
+  --rose:#9C5A52; --rose2:#F0DFDB;
+  --line:#D7DCD5; --line2:#E8EBE6;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI",Meiryo,sans-serif;
+  --serif:"Hiragino Mincho ProN","Yu Mincho",serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:15px;overflow-x:clip}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:clip;max-width:100vw}
+#app{overflow-x:clip}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:16px;color:var(--ink)}
+:focus-visible{outline:2px solid var(--sage);outline-offset:2px}
+
+#app{display:grid;grid-template-rows:auto 1fr;min-height:100vh}
+header{background:var(--rail);color:#E9EEEA;display:flex;align-items:center;gap:12px;padding:11px 18px;padding-right:max(18px,env(safe-area-inset-right));position:sticky;top:0;z-index:50;flex-wrap:nowrap;min-height:54px}
+.brand{font-family:var(--serif);font-size:1.1rem;font-weight:600;letter-spacing:.16em;flex-shrink:0}
+.brand .mk{color:var(--amber);font-size:1.2rem;margin-right:2px}
+.hd-sp{flex:1;min-width:0}
+.valve{display:flex;align-items:center;gap:8px;border-radius:999px;padding:6px 13px 6px 9px;font-size:.76rem;border:1px solid;background:transparent;transition:all .2s}
+.valve .dot{width:10px;height:10px;border-radius:50%;transition:all .2s}
+.valve.on{border-color:var(--amber);color:var(--amber2)}
+.valve.on .dot{background:var(--amber);box-shadow:0 0 7px 1px rgba(192,138,62,.5)}
+.valve.off{border-style:dashed;border-color:#5A6A62;color:#9DAAA0}
+.valve.off .dot{border:1.5px dashed #859790}
+.hd-ic{background:transparent;border:1px solid #44514A;color:#C2CDC6;border-radius:7px;width:34px;height:32px;font-size:.9rem;display:inline-flex;align-items:center;justify-content:center}
+.hd-ic:hover{border-color:var(--amber);color:var(--amber2)}
+.panic{background:var(--rose);border:none;color:#fff;border-radius:7px;padding:6px 12px;font-size:.76rem;font-weight:600}
+.panic:hover{background:#86473F}
+
+.layout{display:grid;grid-template-columns:208px 1fr;min-height:0}
+nav{background:var(--rail);padding:12px 0 24px;border-top:1px solid #3A463F}
+nav a{display:flex;align-items:center;gap:10px;color:#A7B3AC;text-decoration:none;padding:11px 18px;font-size:.9rem;border-left:3px solid transparent}
+nav a .nm{font-family:var(--mono);font-size:.64rem;color:#5E6E66;width:20px}
+nav a:hover{color:#E9EEEA;background:var(--rail2)}
+nav a.act{color:var(--amber2);border-left-color:var(--amber);background:var(--rail2)}
+nav a.act .nm{color:var(--amber)}
+main{padding:26px 30px 70px;max-width:1000px;width:100%;min-width:0}
+
+.eyebrow{font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;color:var(--ink3);text-transform:uppercase}
+h1{font-family:var(--serif);font-size:1.5rem;font-weight:600;letter-spacing:.03em;margin:3px 0 4px}
+.sub{color:var(--ink2);font-size:.86rem;margin-bottom:20px;max-width:64ch}
+.toolbar{display:flex;gap:10px;align-items:center;margin:14px 0 18px;flex-wrap:wrap}
+.btn{background:var(--ink);color:#F4F6F3;border:none;border-radius:8px;padding:9px 17px;font-size:.86rem}
+.btn:hover{background:var(--rail2)}
+.btn.amber{background:var(--amber);color:#fff}
+.btn.amber:hover{background:#A9762F}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn.ghost:hover{border-color:var(--ink2)}
+.btn.sage{background:var(--sage);color:#fff}
+.btn.danger{background:transparent;border:1px solid #D6B4AE;color:var(--rose)}
+.btn.sm{padding:5px 11px;font-size:.78rem;border-radius:6px}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:14px}
+.card h3{font-size:1rem;font-weight:600;margin-bottom:3px}
+.muted{color:var(--ink2);font-size:.84rem}
+
+.banner{border-radius:9px;padding:11px 15px;font-size:.82rem;margin-bottom:16px;line-height:1.6}
+.banner.sage{background:var(--sage2);border:1px solid #BFD2C6;color:#2E4B3B}
+.banner.amber{background:var(--amber2);border:1px solid #DEC79C;color:var(--ambertext)}
+.banner.rose{background:var(--rose2);border:1px solid #DBB8B1;color:#7A3E36}
+
+.fld{margin-bottom:15px}
+.fld label{display:block;font-size:.82rem;font-weight:600;color:var(--ink);margin-bottom:5px}
+.fld .desc{font-size:.76rem;color:var(--ink2);margin-bottom:7px}
+.fld input,.fld select,.fld textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 11px;background:#fff}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:15px 20px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+/* segmented control for self-report (tap, not type) */
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 13px;font-size:.84rem;color:var(--ink2)}
+.seg button.on{background:var(--sage);border-color:var(--sage);color:#fff}
+.seg button:hover:not(.on){border-color:var(--sage)}
+
+/* waterfall (the signature) */
+.wf{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;margin:8px 0 16px}
+.wf-row{display:grid;grid-template-columns:130px 1fr 92px;gap:10px;align-items:center;padding:5px 0}
+.wf-row .lab{font-size:.82rem}
+.wf-row .lab small{display:block;color:var(--ink3);font-size:.68rem}
+.wf-track{position:relative;height:26px;background:repeating-linear-gradient(90deg,#F1F4F0,#F1F4F0 1px,transparent 1px,transparent 40px);border-radius:5px}
+.wf-bar{position:absolute;top:3px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:.7rem;color:#fff;font-family:var(--mono)}
+.wf-bar.base{background:var(--ink2)}
+.wf-bar.pos{background:var(--sage)}
+.wf-bar.neg{background:var(--rose)}
+.wf-val{text-align:right;font-family:var(--mono);font-size:.82rem}
+.wf-total{border-top:2px solid var(--ink);margin-top:10px;padding-top:12px}
+.wf-range{font-family:var(--serif);font-size:1.7rem;font-weight:600;text-align:center;letter-spacing:.02em}
+.wf-range small{font-family:var(--sans);font-size:.8rem;color:var(--ink2);font-weight:400}
+
+/* coefficient editor */
+.coef{display:grid;grid-template-columns:1fr 78px 78px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line2);font-size:.82rem}
+.coef:last-child{border-bottom:none}
+.coef input{width:100%;border:1px solid var(--line);border-radius:6px;padding:5px 7px;text-align:right;font-family:var(--mono);font-size:16px}
+.coef .ch{font-family:var(--mono);font-size:.66rem;color:var(--ink3);text-align:center}
+
+/* split / margin viz */
+.splitbar{height:46px;border-radius:9px;overflow:hidden;display:flex;margin:14px 0 6px;border:1px solid var(--line)}
+.splitbar .seg-you{background:var(--sage);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.82rem;font-weight:600}
+.splitbar .seg-agency{background:var(--rose);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.82rem;font-weight:600}
+.splitbar .seg-other{background:var(--ink2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.78rem}
+.legend{display:flex;gap:16px;font-size:.78rem;color:var(--ink2);flex-wrap:wrap}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:middle}
+
+.gauge{margin:14px 0}
+.gauge .track{height:12px;background:var(--line2);border-radius:6px;position:relative;overflow:hidden}
+.gauge .fill{height:12px;border-radius:6px}
+.gauge .marks{display:flex;justify-content:space-between;font-size:.68rem;color:var(--ink3);font-family:var(--mono);margin-top:4px}
+
+.note{background:var(--sage2);border-left:3px solid var(--sage);border-radius:0 8px 8px 0;padding:11px 14px;font-size:.82rem;margin:14px 0;color:#2E4B3B}
+.sec-h{font-family:var(--mono);font-size:.7rem;letter-spacing:.16em;color:var(--ink3);margin:28px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--line);text-transform:uppercase}
+.pill{display:inline-block;font-size:.74rem;background:var(--line2);border-radius:5px;padding:2px 9px;color:var(--ink2);margin:2px 0}
+.empty{color:var(--ink2);font-size:.88rem;padding:26px;text-align:center;border:1px dashed var(--line);border-radius:12px}
+ul.pts{margin:6px 0 0;padding-left:0;list-style:none}
+ul.pts li{padding:7px 0 7px 22px;position:relative;font-size:.86rem;border-bottom:1px solid var(--line2)}
+ul.pts li:last-child{border-bottom:none}
+ul.pts li::before{content:"›";position:absolute;left:6px;color:var(--sage);font-weight:700}
+pre.out{background:var(--rail);color:#DBE3DD;border-radius:10px;padding:16px;font-family:var(--mono);font-size:.76rem;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;line-height:1.7;max-width:100%}
+
+/* panic overlay */
+#panicScreen{position:fixed;inset:0;background:#F4F6F3;z-index:9999;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px}
+#panicScreen.show{display:flex}
+#panicScreen h2{font-family:var(--serif);font-size:1.6rem;color:var(--ink);font-weight:600;margin-bottom:8px}
+#panicScreen p{color:var(--ink2);max-width:40ch}
+#panicScreen .resume{margin-top:26px}
+/* first-run safety intro */
+#introScreen{position:fixed;inset:0;background:rgba(24,32,28,.55);z-index:9998;display:none;align-items:center;justify-content:center;padding:22px}
+#introScreen.show{display:flex}
+.intro-card{background:#FBFAF6;max-width:470px;width:100%;border-radius:14px;padding:28px 26px;box-shadow:0 18px 50px rgba(0,0,0,.28)}
+.intro-card h2{font-family:var(--serif);font-size:1.35rem;margin-bottom:4px}
+.intro-card .lead{color:var(--ink2);font-size:.9rem;margin-bottom:14px}
+.intro-item{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-top:1px solid var(--line)}
+.intro-item .ic{font-size:1.15rem;line-height:1.35;flex-shrink:0}
+.intro-item b{font-size:.92rem;display:block;margin-bottom:2px}
+.intro-item p{font-size:.82rem;color:var(--ink2);margin:0}
+
+.priv input.masked{-webkit-text-security:disc;text-security:disc}
+.coefrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line2)}
+.coefrow:last-child{border-bottom:none}
+.coefrow .cr-label{flex:1;font-size:.86rem}
+.coefrow .cr-label small{display:block;color:var(--ink3);font-size:.7rem}
+.coefrow .cr-input{width:96px;border:1px solid var(--line);border-radius:7px;padding:7px 9px;text-align:right;font-family:var(--mono);font-size:16px;background:#fff}
+.coefrow .cr-sign{width:32px;height:34px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink2);font-size:1rem;flex-shrink:0}
+.coefrow .cr-sign:hover{border-color:var(--sage);color:var(--sage)}
+.coefrow .cr-unit{font-size:.74rem;color:var(--ink3);width:34px}
+
+@media (max-width:860px){
+  .layout{grid-template-columns:1fr}
+  nav{display:flex;overflow-x:auto;padding:0;border-bottom:1px solid #3A463F;position:sticky;top:54px;z-index:49;-webkit-overflow-scrolling:touch}
+  nav a{border-left:none;border-bottom:3px solid transparent;white-space:nowrap;padding:11px 15px}
+  nav a.act{border-bottom-color:var(--amber)}
+  nav a .nm{display:none}
+  main{padding:18px 14px 60px}
+  .grid2{grid-template-columns:1fr}
+  .wf-row{grid-template-columns:104px 1fr 76px}
+  .brand{font-size:.98rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="brand"><span class="mk">◇</span>Compass</div>
+    <button id="valve" class="valve off" onclick="toggleStorage()" title="保存モード">
+      <span class="dot"></span><span id="valveLabel"><b>OFF</b></span>
+    </button>
+    <div class="hd-sp"></div>
+    <button class="hd-ic" onclick="exportJSON()" title="書き出し">⤓</button>
+    <button class="hd-ic" onclick="document.getElementById('importFile').click()" title="読み込み">⤒</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(this)">
+    <button class="panic" onclick="showPanic()" title="Escキーでも作動">そっと隠す</button>
+  </header>
+  <div class="layout">
+    <nav id="nav"></nav>
+    <main id="view"></main>
+  </div>
+</div>
+<div id="introScreen">
+  <div class="intro-card">
+    <h2>はじめる前に、3つだけ。</h2>
+    <p class="lead">これは、あなたの働きの価値を<b>あなた自身の手で</b>確かめるための道具です。安心して使えるよう、こう作られています。</p>
+    <div class="intro-item"><span class="ic">🔒</span><div><b>入力は、この端末から出ません</b><p>どこにも送信されません。集計サーバーもありません。あなたが書き出さない限り、誰にも見えません。</p></div></div>
+    <div class="intro-item"><span class="ic">🌫</span><div><b>保存するかどうかは、あなたが選べます</b><p>いまは「保存オフ」。画面を閉じれば入力は消えます。残したいときだけ右上でオンに。</p></div></div>
+    <div class="intro-item"><span class="ic">👀</span><div><b>見られそうなときは、そっと隠せます</b><p>右上の「そっと隠す」か Escキーで、ふつうのキャリアメモ帳の画面に切り替わります。</p></div></div>
+    <button class="btn" style="width:100%;margin-top:18px" onclick="dismissIntro()">確認しました、はじめる</button>
+  </div>
+</div>
+<div id="panicScreen">
+  <h2>Compass</h2>
+  <p>キャリアや働き方を整理するためのメモ帳です。続けるには下のボタンを押してください。</p>
+  <button class="btn resume" onclick="hidePanic()">再開する</button>
+</div>
+<script>
+/* ============================================================
+   COMPASS — a dignity-first, fully-local self-assessment tool.
+   No network. No transmission. Data stays on this device.
+   Transparent additive model: every figure is visible & editable.
+   ============================================================ */
+
+/* ---------- model definitions (PLACEHOLDER coefficients) ----------
+   These numbers are illustrative starting points, NOT real market data.
+   They are fully editable by the user. Units: JPY per hour adjustment.
+*/
+function defaultModel(){
+  return {
+    baseLow:3000, baseHigh:5000,
+    note:"下の数値はすべて編集できる仮の出発点です。あなたの地域・実感に合わせて書き換えてください。",
+    drivers:[
+      {id:"exp", label:"経験年数", desc:"この仕事の経験の長さ",
+       options:[{k:"〜半年",lo:-500,hi:-300},{k:"半年〜2年",lo:0,hi:0},{k:"2〜5年",lo:400,hi:700},{k:"5年〜",lo:700,hi:1200}]},
+      {id:"repeat", label:"リピート率(指名の多さ)", desc:"再来のお客さまの割合",
+       options:[{k:"低い",lo:-400,hi:-200},{k:"ふつう",lo:0,hi:0},{k:"高い",lo:500,hi:900},{k:"とても高い",lo:1000,hi:1600}]},
+      {id:"fill", label:"予約の埋まりやすさ", desc:"出勤前日の予約の入り具合",
+       options:[{k:"空きが多い",lo:-400,hi:-200},{k:"半分ほど",lo:0,hi:0},{k:"ほぼ満了",lo:400,hi:700},{k:"常に満了",lo:800,hi:1300}]},
+      {id:"skill", label:"提供できる専門性・付加価値", desc:"語学・資格・特別な対応など、本人が選んで申告",
+       options:[{k:"特になし",lo:0,hi:0},{k:"ひとつ",lo:300,hi:500},{k:"複数",lo:600,hi:1000}]},
+      {id:"area", label:"エリアの相場帯", desc:"働く地域のおおまかな価格帯(主観でよい)",
+       options:[{k:"低め",lo:-600,hi:-300},{k:"標準",lo:0,hi:0},{k:"高め",lo:500,hi:900},{k:"最高帯",lo:1000,hi:1700}]},
+      {id:"flex", label:"時間帯・シフトの融通", desc:"需要の高い時間に動けるか",
+       options:[{k:"限られる",lo:-300,hi:-150},{k:"ふつう",lo:0,hi:0},{k:"柔軟",lo:300,hi:550}]}
+    ]
+  };
+}
+
+function defaultState(){
+  return {v:1,
+    settings:{storageEnabled:false},
+    model:defaultModel(),
+    diag:{},          // driverId -> selected option index
+    skillTags:[],     // optional self-declared specialties (US-1')
+    split:{customer:"",you:"",agencyFields:[]}, // module 2 inputs
+    bench:{mine:null,pool:[]},   // self-reported benchmark data (stays local)
+    coefs:null,       // prediction model coefficients (lazy-init via ensureModel)
+    demoN:0,          // current demo dataset size (dev/testing)
+    design:null,      // distribution designer params (lazy via ensureDesign)
+    deviceKey:null,   // random per-install idempotency key (not identifying)
+  };
+}
+
+/* ---------- storage ---------- */
+const KEY="compass.v1";
+let storageOK=true;
+try{localStorage.setItem("__t","1");localStorage.removeItem("__t");}catch(e){storageOK=false;}
+function loadState(){if(!storageOK)return null;try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):null;}catch(e){return null;}}
+let state=loadState()||defaultState();
+if(!state.model)state.model=defaultModel();
+if(!state.settings)state.settings={storageEnabled:false};
+if(!state.diag)state.diag={};
+if(!state.skillTags)state.skillTags=[];
+if(!state.split)state.split={customer:"",you:"",agencyFields:[]};
+if(!state.bench)state.bench={mine:null,pool:[]};
+if(state.demoN==null)state.demoN=0;
+
+function persist(){if(state.settings.storageEnabled&&storageOK){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}}
+function commit(rerender=true){persist();if(rerender)render();}
+function toggleStorage(){
+  if(state.settings.storageEnabled){
+    state.settings.storageEnabled=false;
+    if(storageOK&&confirm("保存をオフにします。\nこの端末に保存済みのデータも消去しますか？\n※画面の内容はこのまま使えます。書き出しでファイル保存も可能です。")){
+      try{localStorage.removeItem(KEY);}catch(e){}
+    }
+  }else{
+    if(!storageOK){alert("この画面では端末保存が使えません。ファイルとして保存し、ブラウザで開くと保存が有効になります。");return;}
+    state.settings.storageEnabled=true;persist();
+  }
+  renderValve();render();
+}
+function renderValve(){
+  const v=document.getElementById("valve"),l=document.getElementById("valveLabel");
+  const on=state.settings.storageEnabled;
+  v.className="valve "+(on?"on":"off");
+  l.innerHTML=on?"<b>保存中</b>":"<b>OFF</b>";
+  v.title=on?"この端末に保存しています":"保存していません(閉じると消えます)";
+}
+
+/* ---------- helpers ---------- */
+const $=id=>document.getElementById(id);
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function val(id){const e=$(id);return e?e.value.trim():"";}
+function numv(id){const v=val(id).replace(/[,，]/g,"");const n=parseFloat(v);return isNaN(n)?null:n;}
+function yen(n){return "¥"+Math.round(n).toLocaleString("ja-JP");}
+function clamp(n,a,b){return Math.max(a,Math.min(b,n));}
+
+/* ---------- panic button (safety) ---------- */
+function showPanic(){$("panicScreen").classList.add("show");}
+function hidePanic(){$("panicScreen").classList.remove("show");}
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape")showPanic();
+});
+
+/* ---------- router ---------- */
+let ui={bench:null};   // transient UI state (not persisted)
+let route={view:"bench"};
+const NAV=[["bench","01","相場のなかの位置"],["split","02","取り分の確認"],["about","03","この道具について"]];
+function nav(v){route.view=v;render();window.scrollTo(0,0);}
+function renderNav(){
+  $("nav").innerHTML=NAV.map(([v,n,l])=>'<a href="javascript:void(0)" class="'+(route.view===v?"act":"")+'" onclick="nav(\''+v+'\')"><span class="nm">'+n+'</span>'+l+'</a>').join("");
+}
+function render(){
+  renderNav();renderValve();
+  const fn={bench:vBench,split:vSplit,coef:vCoef,design:vDesign,about:vAbout}[route.view]||vBench;
+  $("view").innerHTML=fn();
+}
+function modeBanner(){
+  if(!storageOK)return '<div class="banner amber">この画面ではデータを保存できません。ファイルとして保存し、お手元のブラウザで開くと保存できます。</div>';
+  if(!state.settings.storageEnabled)return '<div class="banner sage">いまは「保存オフ」です。入力は画面を閉じると消えます。続けて使うなら右上で保存をオンに、または書き出しでファイル保存を。</div>';
+  return "";
+}
+/* ============ MODULE 1: 価値の見える化 (diagnose) ============ */
+function computeRange(){
+  const m=state.model;
+  let lo=m.baseLow, hi=m.baseHigh;
+  const parts=[{label:"基準レンジ",sub:"エリア標準の出発点",lo:m.baseLow,hi:m.baseHigh,kind:"base"}];
+  m.drivers.forEach(d=>{
+    const sel=state.diag[d.id];
+    if(sel==null)return;
+    const o=d.options[sel];
+    if(!o)return;
+    lo+=o.lo; hi+=o.hi;
+    if(o.lo!==0||o.hi!==0)parts.push({label:d.label,sub:o.k,lo:o.lo,hi:o.hi,kind:(o.lo+o.hi)>=0?"pos":"neg"});
+  });
+  return {lo:Math.max(0,lo),hi:Math.max(0,hi),parts};
+}
+function vDiagnose(){
+  const m=state.model;
+  const r=computeRange();
+  const answered=Object.keys(state.diag).length;
+  let h=modeBanner()
+   +'<div class="eyebrow">Module 01</div><h1>あなたの価値を、目に見える形に</h1>'
+   +'<p class="sub">あてはまるものを選ぶだけ。出てくる金額は「あなたの価値の断定」ではなく、交渉の出発点になる目安のレンジです。計算の中身はすべて見られて、書き換えられます。</p>';
+
+  // input: tap-based self report
+  m.drivers.forEach(d=>{
+    h+='<div class="card"><div class="fld" style="margin:0"><label>'+esc(d.label)+'</label><div class="desc">'+esc(d.desc)+'</div>'
+     +'<div class="seg">'+d.options.map((o,i)=>'<button class="'+(state.diag[d.id]===i?"on":"")+'" onclick="pick(\''+d.id+'\','+i+')">'+esc(o.k)+'</button>').join("")+'</div></div></div>';
+  });
+
+  // optional specialty tags (US-1', self-declared, never forced)
+  h+='<div class="card"><div class="fld" style="margin:0"><label>専門性・強み(任意)</label><div class="desc">交渉で根拠にできる強みを、自分の言葉で。書きたくない項目は空欄でかまいません。</div>'
+   +'<div class="row" style="margin-bottom:8px">'+(state.skillTags.map((t,i)=>'<span class="pill">'+esc(t)+' <a href="javascript:void(0)" onclick="rmTag('+i+')" style="color:var(--rose);text-decoration:none">×</a></span>').join("")||'<span class="muted">まだありません</span>')+'</div>'
+   +'<div class="row"><input id="tagIn" placeholder="例: 接客の指名が多い / 語学対応" style="flex:1" onkeydown="if(event.key===\'Enter\')addTag()"><button class="btn sage sm" onclick="addTag()">追加</button></div></div></div>';
+
+  if(answered===0){
+    h+='<div class="empty">上の項目をいくつか選ぶと、ここに金額のレンジと「何がそれを押し上げているか」が表示されます。</div>';
+    return h;
+  }
+
+  // waterfall (signature)
+  h+='<div class="sec-h">レンジの内訳</div>';
+  h+=waterfall(r);
+
+  // negotiation points (US-2')
+  h+='<div class="sec-h">交渉で使える論点</div>'+negotiationPoints(r);
+
+  h+='<div class="toolbar"><button class="btn amber" onclick="copyDiag()">この結果を持ち出す(匿名)</button><button class="btn ghost" onclick="resetDiag()">選び直す</button></div>';
+  return h;
+}
+
+function waterfall(r){
+  const all=r.parts;
+  const maxHi=Math.max(r.hi, ...all.map(p=>Math.abs(p.lo)), ...all.map(p=>Math.abs(p.hi)),1);
+  const scale=100/maxHi;
+  let h='<div class="wf">';
+  all.forEach(p=>{
+    const mid=(p.lo+p.hi)/2;
+    const w=clamp(Math.abs(mid)*scale,6,96);
+    let bartxt = p.kind==="base" ? (yen(p.lo)+"〜"+yen(p.hi)) : "";
+    h+='<div class="wf-row"><div class="lab">'+esc(p.label)+'<small>'+esc(p.sub)+'</small></div>'
+     +'<div class="wf-track"><div class="wf-bar '+p.kind+'" style="left:2%;width:'+w+'%">'+bartxt+'</div></div>'
+     +'<div class="wf-val">'+(mid>=0&&p.kind!=="base"?"+":"")+yen(mid)+'</div></div>';
+  });
+  h+='<div class="wf-total"><div class="wf-range">'+yen(r.lo)+' 〜 '+yen(r.hi)+' <small>/ 時間(目安)</small></div></div>';
+  h+='</div>';
+  h+='<div class="note">この数字は「交渉の出発点」です。あなたの価値そのものを表す絶対値ではありません。相場や状況で変わります。違和感があれば「計算の中身」で係数を自分の実感に書き換えてください。</div>';
+  return h;
+}
+
+function negotiationPoints(r){
+  const m=state.model;
+  const pos=[],neg=[];
+  m.drivers.forEach(d=>{
+    const sel=state.diag[d.id];if(sel==null)return;
+    const o=d.options[sel];if(!o)return;
+    const mid=(o.lo+o.hi)/2;
+    if(mid>0)pos.push({label:d.label,opt:o.k,mid});
+    else if(mid<0)neg.push({label:d.label,opt:o.k,mid});
+  });
+  pos.sort((a,b)=>b.mid-a.mid);neg.sort((a,b)=>a.mid-b.mid);
+  let h='<div class="card"><b style="font-size:.9rem">強みとして主張できる点</b><ul class="pts">';
+  if(pos.length)pos.forEach(p=>{h+='<li>「'+esc(p.label)+'」が'+esc(p.opt)+'であることは、基準より高い単価を求める根拠になります（目安 +'+yen(p.mid)+'/時）。</li>';});
+  else h+='<li>いまの選択では、基準を押し上げる強みが選ばれていません。専門性タグや経験の項目を見直してみてください。</li>';
+  h+='</ul></div>';
+  if(state.skillTags.length){
+    h+='<div class="card"><b style="font-size:.9rem">あなたが申告した強み</b><ul class="pts">'+state.skillTags.map(t=>'<li>'+esc(t)+'</li>').join("")+'</ul><p class="muted" style="margin-top:6px">これらは数値に自動換算していません。交渉の場で具体例として語れる材料です。</p></div>';
+  }
+  if(neg.length){
+    h+='<div class="card"><b style="font-size:.9rem">下げ要因とどう向き合うか</b><ul class="pts">'+neg.map(p=>'<li>「'+esc(p.label)+'」は現状不利に働きえますが、他の強みと併せて交渉すれば相殺できます。改善できる項目かどうかも検討材料です。</li>').join("")+'</ul></div>';
+  }
+  return h;
+}
+
+function pick(did,i){state.diag[did]=(state.diag[did]===i?undefined:i);if(state.diag[did]===undefined)delete state.diag[did];commit();}
+function resetDiag(){if(!confirm("選択をすべてクリアしますか？"))return;state.diag={};commit();}
+function addTag(){const v=val("tagIn");if(!v)return;state.skillTags.push(v);commit();}
+function rmTag(i){state.skillTags.splice(i,1);commit();}
+function copyDiag(){
+  const r=computeRange();
+  let t="【働き方メモ｜価値の目安】\n";
+  t+="目安レンジ: "+yen(r.lo)+" 〜 "+yen(r.hi)+" / 時間\n（交渉の出発点。価値の断定ではありません）\n\n内訳:\n";
+  r.parts.forEach(p=>{t+="・"+p.label+"("+p.sub+"): "+(p.kind==="base"?yen(p.lo)+"〜"+yen(p.hi):((p.lo+p.hi)/2>=0?"+":"")+yen((p.lo+p.hi)/2))+"\n";});
+  if(state.skillTags.length)t+="\n申告した強み: "+state.skillTags.join("、")+"\n";
+  t+="\n※個人を特定する情報は含めていません。";
+  copyText(t);
+}
+function copyText(t){
+  const done=()=>alert("コピーしました。貼り付け先にご注意ください。");
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done).catch(()=>fb(t,done));
+  else fb(t,done);
+}
+function fb(t,done){const ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done();}catch(e){}document.body.removeChild(ta);}
+/* ============ MODULE 2: 取り分の確認 (split) ============ */
+function vSplit(){
+  const s=state.split;
+  let h=modeBanner()
+   +'<div class="eyebrow">Module 02</div><h1>あなたの取り分を、はっきりさせる</h1>'
+   +'<p class="sub">お客さまが払う金額のうち、実際に手元に残るのはいくらか。間に入る人が取る割合を見える化します。数字はすべてこの端末の中だけで計算され、どこにも送られません。</p>';
+
+  h+='<div class="card priv">'
+   +'<div class="grid2">'
+   +'<div class="fld"><label>お客さまの支払い額(1回/1時間あたり)</label><div class="desc">サービスの総額</div><input id="sp_cust" inputmode="numeric" value="'+esc(s.customer)+'" placeholder="例: 15000" oninput="onSplitInput()"></div>'
+   +'<div class="fld"><label>あなたの手取り</label><div class="desc">最終的に自分に残る額</div><input id="sp_you" inputmode="numeric" value="'+esc(s.you)+'" placeholder="例: 7000" oninput="onSplitInput()"></div>'
+   +'</div>'
+   +'<div class="fld" style="margin-bottom:6px"><label>差し引かれているもの(任意・わかる範囲で)</label><div class="desc">店舗・斡旋手数料・送迎・指名バック控除など。名前と金額を入れると内訳に反映されます。</div></div>'
+   +'<div id="agencyList">'+agencyRows()+'</div>'
+   +'<button class="btn ghost sm" onclick="addAgency()">＋ 差引項目を追加</button>'
+   +'</div>';
+
+  const c=s.customer!==""?parseFloat(String(s.customer).replace(/[,，]/g,"")):null;
+  const y=s.you!==""?parseFloat(String(s.you).replace(/[,，]/g,"")):null;
+  h+='<div id="splitResult">'+splitResultHTML(c,y)+'</div>';
+  return h;
+}
+function splitResultHTML(c,y){
+  if(c!=null&&c>0&&y!=null)return renderSplit(c,y);
+  return '<div class="empty">支払い額と手取りを入れると、取り分の割合と中間マージンが表示されます。</div>';
+}
+function agencyRows(){
+  const s=state.split;
+  if(!s.agencyFields.length)s.agencyFields=[];
+  return s.agencyFields.map((f,i)=>
+    '<div class="row" style="margin-bottom:7px"><input value="'+esc(f.label||"")+'" placeholder="項目名(例: 店舗手数料)" style="flex:2" oninput="setAgency('+i+',\'label\',this.value)">'
+    +'<input value="'+esc(f.amount||"")+'" inputmode="numeric" placeholder="金額" style="flex:1" oninput="setAgency('+i+',\'amount\',this.value)">'
+    +'<button class="btn danger sm" onclick="rmAgency('+i+')">×</button></div>').join("");
+}
+function renderSplit(cust,you){
+  const known=state.split.agencyFields.reduce((a,f)=>{const v=parseFloat(String(f.amount||"").replace(/[,，]/g,""));return a+(isNaN(v)?0:v);},0);
+  const taken=cust-you;                    // total not reaching you
+  const otherTaken=Math.max(0,taken-known);// unexplained middle
+  const youPct=clamp(you/cust*100,0,100);
+  const knownPct=clamp(known/cust*100,0,100);
+  const otherPct=clamp(otherTaken/cust*100,0,100);
+  const takenPct=clamp(taken/cust*100,0,100);
+
+  let h='<div class="sec-h">取り分の内訳</div><div class="card">';
+  h+='<div class="splitbar">'
+   +'<div class="seg-you" style="width:'+youPct+'%">'+(youPct>11?"あなた "+Math.round(youPct)+"%":"")+'</div>'
+   +(knownPct>0?'<div class="seg-agency" style="width:'+knownPct+'%">'+(knownPct>11?"差引 "+Math.round(knownPct)+"%":"")+'</div>':"")
+   +(otherPct>0?'<div class="seg-other" style="width:'+otherPct+'%">'+(otherPct>11?"不明 "+Math.round(otherPct)+"%":"")+'</div>':"")
+   +'</div>';
+  h+='<div class="legend"><span><i style="background:var(--sage)"></i>あなたの手取り '+yen(you)+'</span>'
+   +(known>0?'<span><i style="background:var(--rose)"></i>判明している差引 '+yen(known)+'</span>':"")
+   +(otherTaken>0?'<span><i style="background:var(--ink2)"></i>内訳不明の差引 '+yen(otherTaken)+'</span>':"")+'</div>';
+
+  // margin gauge
+  h+='<div class="sec-h" style="margin-top:22px">中間マージン率</div>';
+  const col=takenPct>=60?"var(--rose)":takenPct>=45?"var(--amber)":"var(--sage)";
+  h+='<div class="gauge"><div class="track"><div class="fill" style="width:'+takenPct+'%;background:'+col+'"></div></div>'
+   +'<div class="marks"><span>0%</span><span>50%</span><span>100%</span></div></div>';
+  h+='<p style="font-size:.92rem"><b>あなたに届かない割合は '+Math.round(takenPct)+'%</b>（'+yen(taken)+'）。お客さまが払う'+yen(cust)+'のうち、手元に残るのは'+yen(you)+'です。</p>';
+
+  // contextual interpretation (transparent, non-accusatory but honest)
+  h+='<div class="note">';
+  if(takenPct>=60)h+='中間に取られる割合がかなり高めです。判明していない差引が大きい場合は、その内訳を確認する正当な理由があります。同じ条件で手取りの良い選択肢がないか、比べてみる価値があります。';
+  else if(takenPct>=45)h+='中間マージンは平均的〜やや高めの範囲です。差引の内訳が説明されているか、見合うサービス（集客・安全管理など）があるかが判断の目安になります。';
+  else h+='あなたの手取り割合は比較的高めです。今の条件がなぜ良いのかを把握しておくと、別の話を持ちかけられたとき守りやすくなります。';
+  h+='</div>';
+
+  if(otherTaken>0){
+    h+='<div class="banner rose" style="margin-top:12px">内訳がわからない差引が '+yen(otherTaken)+'（'+Math.round(otherPct)+'%）あります。これが何への対価なのかは、確認してよい事柄です。</div>';
+  }
+
+  h+='<div class="toolbar"><button class="btn amber" onclick="openSplitExport('+cust+','+you+','+taken+','+known+','+otherTaken+')">この内訳を持ち出す(匿名)</button></div>';
+  h+='<div id="splitExport"></div>';
+  h+='<p class="muted" style="font-size:.78rem;margin-top:10px">匿名提供が集まると、ここに「みんなの取り分の帯」が出る予定です。提供は「相場のなかの位置」の🌱から(取り分を含めるかは、あなたが選べます)。</p>';
+  h+='</div>';
+  return h;
+}
+function onSplitInput(){
+  state.split.customer=val("sp_cust");
+  state.split.you=val("sp_you");
+  persist();
+  const c=state.split.customer!==""?parseFloat(String(state.split.customer).replace(/[,，]/g,"")):null;
+  const y=state.split.you!==""?parseFloat(String(state.split.you).replace(/[,，]/g,"")):null;
+  const box=$("splitResult");
+  if(box)box.innerHTML=splitResultHTML(c,y);
+}
+function addAgency(){state.split.agencyFields.push({label:"",amount:""});commit();}
+function setAgency(i,k,v){
+  state.split.agencyFields[i][k]=v;persist();
+  const c=state.split.customer!==""?parseFloat(String(state.split.customer).replace(/[,，]/g,"")):null;
+  const y=state.split.you!==""?parseFloat(String(state.split.you).replace(/[,，]/g,"")):null;
+  const box=$("splitResult");
+  if(box)box.innerHTML=splitResultHTML(c,y);
+}
+function rmAgency(i){state.split.agencyFields.splice(i,1);commit();}
+function splitText(cust,you,taken,known,other){
+  let t="【働き方メモ｜取り分の確認】\n";
+  t+="お客さまの支払い: "+yen(cust)+"\nあなたの手取り: "+yen(you)+"（"+Math.round(you/cust*100)+"%）\n";
+  t+="あなたに届かない計: "+yen(taken)+"（"+Math.round(taken/cust*100)+"%）\n";
+  if(known>0)t+="  判明している差引: "+yen(known)+"\n";
+  if(other>0)t+="  内訳不明の差引: "+yen(other)+"\n";
+  t+="\n※個人を特定する情報は含めていません。";
+  return t;
+}
+/* Opens a VISIBLE export panel. The text is always shown in a selectable box,
+   so even if the clipboard API fails silently (file://, older browsers), the
+   user can still select & copy by hand — pressing the button always visibly
+   does something. */
+function openSplitExport(cust,you,taken,known,other){
+  const t=splitText(cust,you,taken,known,other);
+  const el=document.getElementById("splitExport");if(!el)return;
+  const canShare=!!(navigator.share);
+  el.innerHTML='<div style="margin-top:12px;border:1px solid var(--line);border-radius:10px;padding:14px;background:#FCFBF7">'
+   +'<div class="eyebrow" style="margin-bottom:6px">持ち出す内容(匿名・これがすべて)</div>'
+   +'<textarea id="sp_out" readonly rows="8" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-family:var(--mono);font-size:.78rem;line-height:1.7">'+esc(t)+'</textarea>'
+   +'<div class="row" style="margin-top:10px;gap:8px">'
+   +'<button id="sp_copyBtn" class="btn sm" onclick="doSplitCopy()">コピーする</button>'
+   +(canShare?'<button class="btn ghost sm" onclick="doSplitShare()">共有…</button>':'')
+   +'</div>'
+   +'<p class="muted" style="margin-top:8px;font-size:.76rem">相談先(支援団体・労働相談など)に見せる用のメモです。コピーできない環境でも、上の枠を長押し(または全選択)で手動コピーできます。貼り付け先にはご注意ください。</p>'
+   +'</div>';
+  el.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function doSplitCopy(){
+  const ta=document.getElementById("sp_out");if(!ta)return;
+  const btn=document.getElementById("sp_copyBtn");
+  const ok=()=>{if(btn){btn.textContent="✓ コピーしました";btn.disabled=true;setTimeout(()=>{btn.textContent="コピーする";btn.disabled=false;},2200);}};
+  const manual=()=>{ta.focus();ta.select();if(btn)btn.textContent="上の枠を長押しでコピーしてください";};
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(ta.value).then(ok).catch(()=>{ // fall back to execCommand, then to manual selection
+      try{ta.focus();ta.select();if(document.execCommand("copy")){ok();}else manual();}catch(e){manual();}
+    });
+  }else{
+    try{ta.focus();ta.select();if(document.execCommand("copy")){ok();}else manual();}catch(e){manual();}
+  }
+}
+function doSplitShare(){
+  const ta=document.getElementById("sp_out");if(!ta)return;
+  navigator.share({text:ta.value}).catch(()=>{});
+}
+/* ============ MODULE 3: 計算の中身 (model editor) ============ */
+function vModel(){
+  const m=state.model;
+  let h=modeBanner()
+   +'<div class="eyebrow">Module 04</div><h1>計算の中身を、すべて見せます</h1>'
+   +'<p class="sub">このツールはブラックボックスではありません。下の数値が、Module 01 のレンジを作っているすべてです。最初の値は仮の出発点なので、あなたの地域や実感に合わせて自由に書き換えてください。</p>'
+   +'<div class="banner amber">ここにある初期値は、実在の特定地域の相場ではなく<b>説明のための仮の数字</b>です。あなた自身が現実に合わせて調整して初めて、意味のある目安になります。</div>';
+
+  h+='<div class="card"><div class="fld" style="margin:0"><label>基準レンジ(出発点)</label><div class="desc">どの要因も考えない場合のエリア標準。円/時間。</div>'
+   +'<div class="row"><input id="m_baseLo" inputmode="numeric" value="'+m.baseLow+'" style="width:120px" oninput="setBase()"> 〜 <input id="m_baseHi" inputmode="numeric" value="'+m.baseHigh+'" style="width:120px" oninput="setBase()"> 円</div></div></div>';
+
+  m.drivers.forEach(d=>{
+    h+='<div class="card"><b style="font-size:.92rem">'+esc(d.label)+'</b><div class="muted" style="margin-bottom:8px">'+esc(d.desc)+'</div>'
+     +'<div class="coef" style="color:var(--ink3)"><span>選択肢</span><span class="ch">下限(円)</span><span class="ch">上限(円)</span></div>';
+    d.options.forEach((o,i)=>{
+      h+='<div class="coef"><span>'+esc(o.k)+'</span>'
+       +'<input inputmode="numeric" value="'+o.lo+'" oninput="setCoef(\''+d.id+'\','+i+',\'lo\',this.value)">'
+       +'<input inputmode="numeric" value="'+o.hi+'" oninput="setCoef(\''+d.id+'\','+i+',\'hi\',this.value)"></div>';
+    });
+    h+='</div>';
+  });
+
+  h+='<div class="toolbar"><button class="btn ghost" onclick="resetModel()">仮の初期値に戻す</button></div>'
+   +'<div class="note">なぜ加算式の素朴なモデルなのか：限られたデータに複雑なモデルを当てはめると、見せかけの精度が出るだけで、かえって現実から外れます（過剰適合）。誰でも中身を追え、自分で直せる単純さを選んでいます。</div>';
+  return h;
+}
+function setBase(){
+  const lo=numv("m_baseLo"),hi=numv("m_baseHi");
+  if(lo!=null)state.model.baseLow=lo;
+  if(hi!=null)state.model.baseHigh=hi;
+  persist();
+}
+function setCoef(did,i,k,v){
+  const n=parseFloat(String(v).replace(/[,，]/g,""));
+  const d=state.model.drivers.find(x=>x.id===did);
+  if(d&&!isNaN(n))d.options[i][k]=n;
+  persist();
+}
+function resetModel(){
+  if(!confirm("係数を仮の初期値に戻しますか？あなたが調整した内容は失われます。"))return;
+  state.model=defaultModel();commit();
+}
+
+/* ============ MODULE 4: about ============ */
+/* 推定のしくみ(簡易説明) — 計算の中身モジュールを持たないLight版の透明性担保。
+   数式でなく言葉で、かつ出発点(基準相場)だけはここで調整できる。 */
+function aboutMechanismCard(){
+  const base=priorCenterRate("ソープランド");
+  const edited=!!(state.coefs&&state.coefs.baseOverride&&state.coefs.baseOverride["ソープランド"]!=null);
+  return '<div class="card"><b style="font-size:.92rem">推定のしくみ(簡単に)</b>'
+   +'<p class="muted" style="margin-top:6px">推定レンジは、むずかしい計算ではありません。<b>基準の相場</b>(吉原ソープの目安)に、店格と、あなたが答えた項目ごとの決まった加算・減算を<b>足し算しただけ</b>の数字です。ブラックボックスはありません。実データが'+CALIB_MIN_N+'件を超えると、足し算の各値は実データで自動的に見直されます。最初に見えている分布は、作成者が公開情報と経験則から設定した<b>仮のモデル(合成)</b>で、匿名提供が集まるほど実態に置き換わります。</p>'
+   +'<div class="fld" style="margin-top:12px"><label>基準の相場(出発点・円/時間)</label><div class="desc">初期値 '+yen(rawPriorCenterRate("ソープランド"))+' は求人広告由来の粗い目安。あなたの実感に合わせて書き換えられます。'+(edited?' <span class="pill" style="background:var(--amber2);color:var(--ambertext);font-size:.64rem">編集済</span>':'')+'</div>'
+   +'<div class="row"><input inputmode="numeric" value="'+base+'" style="width:130px" oninput="setBaseRate(\'ソープランド\',this.value)"><span class="cr-unit">円/時</span>'
+   +(edited?'<button class="btn ghost sm" onclick="resetBaseRate(\'ソープランド\')">初期値に戻す</button>':'')
+   +'</div></div></div>';
+}
+function vAbout(){
+  return modeBanner()
+   +'<div class="eyebrow">Module 03</div><h1>この道具について</h1>'
+   +'<div class="toolbar" style="margin-bottom:14px"><button class="btn ghost sm" onclick="nav(\'bench\')">← 相場のなかの位置に戻る</button></div>'
+   +'<div class="card"><b style="font-size:.92rem">何のための道具か</b><p class="muted" style="margin-top:6px">自分の働きの価値と取り分を、自分の手で確かめ、交渉の材料にするための道具です。誰かに値段を決められるのではなく、あなたが出発点を持つためのものです。</p><p class="muted" style="margin-top:6px">この版は<b>吉原のソープ</b>に対象を絞っています。対象を絞るのは、匿名の提供が同じ条件に集まり、分布が早く実態に近づくためです(全業態版もあります)。</p></div>'
+   +'<div class="card"><b style="font-size:.92rem">プライバシーと安全</b><ul class="pts" style="margin-top:6px">'
+   +'<li>入力した内容は<b>この端末から外に出ません</b>。インターネットに送信しません。</li>'
+   +'<li>「保存オフ」なら画面を閉じた時点で消えます。続けて使うときだけ保存をオンに。</li>'
+   +'<li>右上の「そっと隠す」または <b>Escキー</b>で、画面を中立的な表示に切り替えられます。</li>'
+   +'<li>持ち出し(コピー)は、個人を特定する情報を含まない形にしています。貼り付け先には十分ご注意ください。</li>'
+   +'</ul></div>'
+   +'<div class="card"><b style="font-size:.92rem">数字の限界について</b><p class="muted" style="margin-top:6px">出てくる金額は「交渉の出発点となる目安」であって、あなたの価値の断定ではありません。元になる相場の数字自体に、本来あるべき公正さからのズレ（中間搾取など）が含まれていることがあります。だからこそ、数字を鵜呑みにせず、仕組みを知って、自分で調整できるようにしています(下の「推定のしくみ」)。</p></div>'
+   +aboutMechanismCard()
+   +(HUB.feedbackUrl?('<div class="card"><b style="font-size:.92rem">感想・違和感を送る(匿名)</b><p class="muted" style="margin-top:6px">この道具への意見・違和感・「ここが現実と違う」の指摘を、名乗らずに送れます。あなたの一言が道具を直します。</p><a class="btn ghost sm" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block" href="'+esc(HUB.feedbackUrl)+'">匿名で送る(ブラウザで開きます)</a></div>'):"")
+   +'<div class="sec-h">データの保存と持ち運び</div>'
+   +'<div class="card"><p class="muted">右上の書き出し(⤓)で全データをファイル保存、読み込み(⤒)で復元できます。別の端末で使うときは、このファイルを移して開き、保存したデータを読み込んでください。</p>'
+   +'<div class="toolbar"><button class="btn" onclick="exportJSON()">書き出し</button><button class="btn ghost" onclick="document.getElementById(\'importFile\').click()">読み込み</button><button class="btn danger" onclick="wipeAll()">すべて消去</button></div></div>'
+   +'<div class="card" style="font-size:.8rem;color:var(--ink2)">Compass — ひとつのHTMLファイルだけで動きます。困ったときの相談先(支援団体・労働相談など)につながる材料として、ここで整理した内容を匿名のまま持ち出せます。</div>'
+   +'<div class="toolbar" style="margin-top:14px"><button class="btn" onclick="nav(\'bench\')">← 相場のなかの位置に戻る</button></div>';
+}
+function demoPanel(){
+  const cur=demoCount();
+  let h='<div class="sec-h">動作確認用ダミーデータ(開発・検証用)</div>'
+   +'<div class="card"><div class="banner amber" style="margin:0 0 12px">これは<b>動作確認のための架空データ</b>です。実在の相場ではありません。Nを切り替えると分布の挙動を試せます。検証が終わったら「ダミーを消去」してください。</div>'
+   +'<p class="muted" style="margin-bottom:8px">現在投入中のダミー件数: <b>'+cur+'</b></p>'
+   +'<div class="seg" style="margin-bottom:10px">'
+   +DEMO_STEPS.map(n=>'<button class="'+(state.demoN===n?"on":"")+'" onclick="loadDemoN('+n+')">N='+n+'</button>').join("")
+   +'</div>'
+   +'<button class="btn danger sm" onclick="clearDemo()">ダミーを消去</button>'
+   +'<p class="muted" style="margin-top:8px;font-size:.76rem">ダミーは業態×エリア×店格にランダム配分され、各変数と売上単価に相関を持たせた合成データです。あなた自身の提供データ(あれば)は保持されます。</p></div>';
+  return h;
+}
+
+/* ============ export / import / wipe ============ */
+function exportJSON(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="compass-"+new Date().toISOString().slice(0,10).replace(/-/g,"")+".json";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+function importJSON(input){
+  const f=input.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      if(d&&typeof d==="object"&&!("model"in d)&&("bin"in d)&&("biz"in d)){
+        // a single shared benchmark record -> merge into pool
+        if(!confirm("他の人の匿名レコードを取り込み、分布に合算します。よろしいですか？"))return;
+        ensureBench();
+        // dedupe by key+cell+bin
+        const exists=state.bench.pool.some(x=>x.key===d.key&&x.biz===d.biz&&x.area===d.area&&x.tier===d.tier&&x.bin===d.bin);
+        if(!exists){
+          // reconstruct a rate proxy at bin midpoint for stats
+          d.rate=(d.bin*BIN)+BIN/2;
+          state.bench.pool.push(d);
+          commit();alert("取り込みました。分布に反映されています。");
+        }else{alert("同じレコードは既に取り込み済みです。");}
+        input.value="";return;
+      }
+      if(!d||typeof d!=="object"||!("model"in d)){alert("Compassのデータファイルではないようです。");return;}
+      if(!confirm("いまの内容を、読み込んだ内容で置き換えます。よろしいですか？"))return;
+      const keep=state.settings.storageEnabled;
+      state=Object.assign(defaultState(),d);
+      state.settings=state.settings||{};state.settings.storageEnabled=keep;
+      if(!state.model)state.model=defaultModel();
+      if(!state.bench)state.bench={mine:null,pool:[]};
+      commit();
+    }catch(e){alert("読み込めませんでした: "+e.message);}
+    input.value="";
+  };
+  r.readAsText(f);
+}
+function wipeAll(){
+  if(!confirm("すべてのデータを消去します。よろしいですか？"))return;
+  if(!confirm("本当に消去しますか？書き出していない場合は元に戻せません。"))return;
+  const keep=state.settings.storageEnabled;
+  state=defaultState();state.settings.storageEnabled=keep;
+  if(storageOK){try{localStorage.removeItem(KEY);}catch(e){}}
+  renderValve();nav("bench");
+}
+
+/* (init moved to final chunk) */
+/* ============================================================
+   MODULE: ベンチマーク & 匿名提供(即時互恵エンジン)
+   - 目的変数: 売上単価(円/時間)
+   - 事前分布: 公開相場(出典付き・信頼度低)/ 事後: 自己申告のベイズ更新
+   - 個票は端末に残す。提供は2500円ビンに丸めた集計レコードのみ。
+   ============================================================ */
+
+/* ---- taxonomy (関東限定・エリア粒度=繁華街/エリア単位) ---- */
+const BIZ=["デリヘル","ホテヘル","店舗型ヘルス","ソープランド","人妻系","エステ・メンズ系","ピンサロ","SMクラブ","その他"];
+const AREA=["吉原","新宿・歌舞伎町","池袋","渋谷","鶯谷","錦糸町","川崎・堀之内","横浜","西川口","大宮","千葉・栄町","その他関東"];
+const TIER=["一般","中級","高級"];
+
+/* expanded self-report drivers used in the benchmark module (tap-based, ordinal) */
+const BDRIVERS=[
+  {id:"age",label:"年齢層",opts:["〜22","23〜27","28〜32","33〜38","39〜"]},
+  {id:"height",label:"身長",opts:["〜150","151〜155","156〜160","161〜165","166〜"]},
+  {id:"weight",label:"体型(BMI目安)",opts:["スリム","やや細","標準","ぽっちゃり","グラマー"]},
+  {id:"bust",label:"バストサイズ(カップ)",opts:["A〜B","C","D","E〜F","G〜"]},
+  {id:"exp",label:"この仕事の経験",opts:["〜半年","半年〜2年","2〜5年","5年〜"]},
+  {id:"repeat",label:"本指名(リピート)の多さ",opts:["少ない","ふつう","多い","非常に多い"]},
+  {id:"fill",label:"予約の埋まりやすさ",opts:["空きが多い","半分ほど","ほぼ満了","常に満了"]},
+  {id:"diary",label:"写メ日記の更新頻度",opts:["ほぼ無","週数回","毎日","1日複数"]},
+  {id:"work",label:"月の出勤日数",opts:["〜5日","6〜12日","13〜20日","20日〜"]},
+  {id:"option",label:"オプション収入の比重",opts:["ほぼ無","少し","それなり","大きい"]},
+  {id:"skill",label:"専門性・付加価値(語学・特別対応など)",opts:["特になし","ひとつ","複数"]}
+];
+const BIN=2500;                       // 売上単価ビン幅(円/時間)
+const BIN_MAX=80000;                  // 上限ビン(これ以上は最終ビンに集約。2h15万円=¥75k/時 をカバー)
+function binIndex(rate){return Math.min(Math.floor(rate/BIN),BIN_MAX/BIN);}
+function binLabel(i){const lo=i*BIN;const hi=lo+BIN;return (i*BIN>=BIN_MAX)?("¥"+BIN_MAX.toLocaleString()+"〜"):("¥"+lo.toLocaleString()+"〜"+hi.toLocaleString());}
+const NBIN=BIN_MAX/BIN+1;
+
+/* ---- public-rate PRIOR (出典付き・信頼度低) ----
+   求人広告系サイト複数一致の代表値から、業態×店格ごとに
+   「中心となる売上単価(円/時間)」を粗く設定。地域差は事前では均一(=実データで較正)。
+   重みは弱め(下記PRIOR_WEIGHT)で、実申告が入れば速やかに上書きされる。
+*/
+const PRIOR_WEIGHT=6;   // 事前の疑似カウント総量(弱め)。実データNがこれを超えると実測が優勢に
+
+/* ============ HUB(手動集約) — 設置者が埋める設定 ============
+   アプリ自身は何も送信しない。提供者が「送る」をタップすると、下のフォームURLが
+   本人のブラウザで開く(送る内容は事前に全文プレビュー)。届いたデータは設置者が
+   目視確認(偽データ対策)のうえ HUB_POOL に焼き込み、次版として再配布する。 */
+const HUB={
+  submitFormUrl:"",   // 例: "https://docs.google.com/forms/d/e/XXXX/viewform"(メール収集なし設定)
+  submitEntryId:"",   // 例: "entry.123456789"(データ欄のプレフィルID)
+  feedbackUrl:""      // 例: マシュマロ等の匿名メッセージURL(感想・違和感の受け口)
+};
+/* 検証済みの提供レコード(設置者が確認して取り込んだ実データ)。次版の配布で全員のNが育つ。
+   形式: {biz,rate(ビン下端の代表値),area,tier,drivers,ts,share(任意・5%帯の下端)} */
+const HUB_POOL=[];
+function rawPriorCenterRate(biz){
+  // コース料金÷時間 を時給換算した粗い中心値。出典: 風俗求人系サイトの公開相場(信頼度=低)
+  // 基準: 一般デリヘル 60分20,000円 × バック率50% = 10,000円/時 を中心に、業態で調整
+  switch(biz){
+    case "ソープランド": return 19000; // Light版: 吉原のエリア加算(+3,000)を基準に畳み込み済み
+    case "デリヘル":     return 10000;
+    case "ホテヘル":     return 10000;
+    case "店舗型ヘルス": return 9000;
+    case "人妻系":       return 8000;
+    case "エステ・メンズ系": return 7000;
+    case "ピンサロ":     return 6000;
+    case "SMクラブ":     return 11000;
+    default:             return 9000;
+  }
+}
+function priorCenterRate(biz){
+  // ユーザーが「計算の中身」で編集した基準値があれば、それを最優先する。
+  // (推定・事前分布・較正の基準がすべて一貫してこの値に従う)
+  if(state.coefs&&state.coefs.baseOverride&&state.coefs.baseOverride[biz]!=null)return state.coefs.baseOverride[biz];
+  return rawPriorCenterRate(biz);
+}
+/* build a prior count vector over bins for a business, centered on priorCenterRate */
+function priorVector(biz){
+  // Light版: 初期分布は既存ダミー(Q_ANCHORSの分位カーブ=作成者設定の仮モデル、
+  // p50=2万・p90=4万・p99=7.5万の右裾型)を1000分位でビン化して流用。
+  // 正直さの担保: 総質量は従来のPRIOR_WEIGHTのまま(実データが目安を置き換える
+  // 速度は不変)で、実データNには一切数えない(observedと別勘定)。
+  const S=1000, v=new Array(NBIN).fill(0);
+  for(let i=0;i<S;i++){
+    const u=(i+0.5)/S;
+    v[binIndex(quantileRate(u))]+=PRIOR_WEIGHT/S;
+  }
+  return v;
+}
+
+/* ---- elasticity drivers (係数=仮定フラグ。将来Nで較正) ---- */
+const ELASTICITY=[
+  {id:"repeat",label:"本指名率",note:"高いほど売上単価を押し上げる(仮定)"},
+  {id:"fill",label:"予約充足率",note:"埋まりやすさは交渉力に直結(仮定)"},
+  {id:"diary",label:"写メ日記の更新頻度",note:"集客努力の指標(仮定)"},
+  {id:"exp",label:"経験年数",note:"一定までは効くが逓減(仮定)"},
+  {id:"skill",label:"専門性・付加価値",note:"差別化要因(仮定)"}
+];
+
+/* ---- local contributed dataset (stays on device unless exported) ---- */
+function ensureBench(){
+  if(!state.bench)state.bench={mine:null, pool:[]};
+  // 検証済みハブデータの取り込み(重複はts+biz+rateで素朴に排除)
+  if(HUB_POOL.length&&!state.bench.hubMerged){
+    const key=r=>r.biz+"|"+r.rate+"|"+(r.ts||"");
+    const have=new Set(state.bench.pool.map(key));
+    HUB_POOL.forEach(r=>{if(!have.has(key(r)))state.bench.pool.push(r);});
+    state.bench.hubMerged=true;
+  }
+  // mine: this user's own latest record (idempotent). pool: imported others (for hub/manual merge).
+  return state.bench;
+}
+/* ---- robust stats over a bin-count vector ---- */
+function percentileFromBins(counts,p){
+  const total=counts.reduce((a,b)=>a+b,0);
+  if(total<=0)return null;
+  let cum=0;const target=total*p;
+  for(let i=0;i<counts.length;i++){
+    cum+=counts[i];
+    if(cum>=target){
+      // midpoint of the bin
+      return (i*BIN)+BIN/2;
+    }
+  }
+  return (counts.length-1)*BIN+BIN/2;
+}
+function observedVector(biz){
+  // aggregate self-reported records matching the business into a bin vector
+  const v=new Array(NBIN).fill(0);
+  const recs=allRecords().filter(r=>r.biz===biz);
+  // IQR trim on the matched rates to drop outliers
+  const rates=recs.map(r=>r.rate).sort((a,b)=>a-b);
+  let lo=-Infinity,hi=Infinity;
+  if(rates.length>=4){
+    const q=(arr,p)=>{const idx=(arr.length-1)*p;const f=Math.floor(idx),c=Math.ceil(idx);return arr[f]+(arr[c]-arr[f])*(idx-f);};
+    const q1=q(rates,0.25),q3=q(rates,0.75),iqr=q3-q1;
+    lo=q1-1.5*iqr; hi=q3+1.5*iqr;
+  }
+  let n=0;
+  recs.forEach(r=>{if(r.rate>=lo&&r.rate<=hi){v[binIndex(r.rate)]++;n++;}});
+  return {v,n};
+}
+function allRecords(){
+  const b=ensureBench();
+  const arr=[...b.pool];
+  if(b.mine)arr.push(b.mine);
+  return arr;
+}
+/* combined prior+observed distribution for a cell, with N-gate metadata */
+function cellDistribution(biz){
+  const prior=priorVector(biz);
+  const {v:obs,n}=observedVector(biz);
+  const combined=prior.map((p,i)=>p+obs[i]);
+  let confidence,gate;
+  if(n>=30){confidence="実データ十分";gate="full";}
+  else if(n>=10){confidence="参考値・サンプル少";gate="partial";}
+  else {confidence="仮の目安ベース(実データ不足)";gate="prior";}
+  return {combined,obs,prior,n,confidence,gate};
+}
+
+/* ---- VIEW: benchmark ---- */
+function vBench(){
+  ensureBench();
+  const f=ui.bench||(ui.bench={biz:"ソープランド",area:"吉原",tier:"",course:"",mins:"60",drivers:{}});
+  f.biz="ソープランド";f.area="吉原"; // Light版は吉原ソープ固定
+  if(!f.drivers)f.drivers={};
+  let h=modeBanner()
+   +'<div class="eyebrow">Module 01</div><h1>相場のなかの、あなたの位置</h1>'
+   // trust chips — the safety essentials, visible at the entry without opening About
+   +'<div class="row" style="gap:6px;flex-wrap:wrap;margin:2px 0 10px">'
+   +'<span class="pill" style="background:var(--sage2);color:var(--teal)">🔒 送信しません</span>'
+   +'<span class="pill" style="background:var(--sage2);color:var(--teal)">端末の外に出ません</span>'
+   +'<span class="pill" style="background:var(--sage2);color:var(--teal)">Escでそっと隠せます</span>'
+   +'<a href="javascript:void(0)" onclick="nav(\'about\')" class="pill" style="background:transparent;border:1px solid var(--line);color:var(--ink2)">詳しく →</a>'
+   +'</div>'
+   +'<p class="sub">吉原のソープではたらく人のなかでの、あなたの位置を見ます。</p>';
+
+  // STEP 1 — the only thing needed to see your position (biz/area fixed: 吉原ソープ)
+  h+='<div class="card"><div class="eyebrow" style="margin-bottom:8px">STEP 1 — これだけ</div>'
+   +'<div class="fld"><label>あなたの売上単価を出す</label><div class="row"><input id="bc_course" inputmode="numeric" placeholder="総額(入浴料+サービス料)" value="'+esc(f.course)+'" oninput="onBenchNum()" style="flex:1"><span>÷</span><input id="bc_mins" inputmode="numeric" placeholder="分" value="'+esc(f.mins)+'" oninput="onBenchNum()" style="width:70px"><span>分</span></div><div class="desc">売上単価 = 総額 ÷ 時間。あなたの取り分でなく、お客さまが支払う総額(入浴料＋サービス料)で。</div></div>'
+   +'</div>';
+
+  // STEP 2 — optional detail attributes, collapsed by default so the payoff
+  // (the chart) is reachable right after the two essentials. Expanding is a
+  // tap (no typing), so full re-render here doesn't break input.
+  const filled=(f.tier?1:0)+Object.keys(f.drivers).length; // エリアは吉原固定のため数えない
+  const total=TOTAL_INPUTS();
+  h+='<div class="card" style="padding:0;overflow:hidden">'
+   +'<button onclick="toggleDetails()" style="width:100%;text-align:left;background:transparent;border:none;padding:15px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px">'
+   +'<span><span class="eyebrow" style="display:block;margin-bottom:2px">STEP 2 — くわしい条件(任意)</span>'
+   +'<span class="muted" style="font-size:.82rem">入力するほど推定レンジが絞れます　<b>'+filled+'/'+total+'</b>項目 入力済み</span></span>'
+   +'<span style="color:var(--ink2);font-size:1rem;transform:rotate('+(ui.detailsOpen?"90":"0")+'deg);transition:.15s">›</span></button>';
+  if(ui.detailsOpen){
+    h+='<div style="padding:0 18px 16px 18px">'
+     +'<div class="muted" style="margin-bottom:10px;font-size:.8rem">これらは分布の絞り込みには使わず、提供データの説明変数として記録されます(将来、何が単価に効くかの分析に使われます)。書きたくない項目は空欄でかまいません。</div>';
+    h+='<div class="fld" style="margin-bottom:12px"><label style="font-weight:500">店格</label><div class="seg">'
+     +TIER.map(t=>'<button class="'+(f.tier===t?"on":"")+'" onclick="setBenchTier(\''+t+'\')">'+esc(t)+'</button>').join("")
+     +'</div></div>';
+    BDRIVERS.forEach(d=>{
+      h+='<div class="fld" style="margin-bottom:12px"><label style="font-weight:500">'+esc(d.label)+'</label><div class="seg">'
+       +d.opts.map((o,i)=>'<button class="'+(f.drivers[d.id]===i?"on":"")+'" onclick="pickBench(\''+d.id+'\','+i+')">'+esc(o)+'</button>').join("")
+       +'</div></div>';
+    });
+    h+='</div>';
+  }
+  h+='</div>';
+
+  // result area updates in place (no full re-render → input focus preserved)
+  h+='<div id="benchResult">'+benchResultHTML()+'</div>';
+  return h;
+}
+function toggleDetails(){ui.detailsOpen=!ui.detailsOpen;render();}
+
+/* soft position wording — a place on the map, not a rank or a verdict */
+function posWord(pct){
+  if(pct==null)return "";
+  if(pct>=90)return "相場の、かなり上のほうにいます。";
+  if(pct>=75)return "相場の、上のほうにいます。";
+  if(pct>=55)return "相場のまんなかより、やや上です。";
+  if(pct>=45)return "相場の、まんなかあたりです。";
+  if(pct>=25)return "相場のまんなかより、やや下です。";
+  return "相場の、下のほうにいます。";
+}
+/* the default view: one big number + a market band with your pin.
+   The histogram (analytic) lives behind くわしく. */
+function bandCard(dist,myRate,pred){
+  const c=dist.combined;
+  const p25=percentileFromBins(c,0.25),p50=percentileFromBins(c,0.5),p75=percentileFromBins(c,0.75);
+  if(p25==null||p75==null)return "";
+  const prior=dist.gate==="prior";
+  // honesty pill: the band looks tidy even when data is thin — say so up front
+  const pill=prior?'<button onclick="toggleBenchDetail()" class="pill" style="background:var(--amber2);color:var(--ambertext);border:none;cursor:pointer;font-size:.66rem">まだ目安ベース</button>':'';
+  let h='<div class="card">';
+  const pct=myRate!=null?positionPercentile(c,myRate):null;
+  if(myRate!=null){
+    const top=Math.max(1,Math.round(100-pct));
+    h+='<div class="row" style="justify-content:space-between;align-items:center"><div class="eyebrow">あなたの単価</div>'+pill+'</div>'
+     +'<b style="font-family:var(--serif);font-size:2.1rem;display:block;line-height:1.15;margin-top:2px">'+yen(myRate)+'<small style="font-size:.85rem;color:var(--ink2);font-family:var(--sans)"> / 時間</small></b>'
+     +'<p style="font-size:.96rem;margin:4px 0 18px">吉原のソープではたらく人の、およそ<b>上位'+top+'%</b>にいます。</p>';
+  }else{
+    h+='<div class="row" style="justify-content:space-between;align-items:center"><div class="eyebrow">はたらく人のなかでの、あなたの位置</div>'+pill+'</div>'
+     +'<p class="muted" style="margin:6px 0 18px">上に総額と分を入れると、あなたの位置(<span style="color:var(--amber)">▲</span>)が出ます。</p>';
+  }
+  // percentile-linear track: left = low earners, right = high. Pin can never
+  // fall off the axis (0-100), so no out-of-range clamping notes are needed.
+  let g1=null,g2=null;
+  if(pred){g1=clamp(positionPercentile(c,pred.lo),0,100);g2=clamp(positionPercentile(c,pred.hi),0,100);}
+  h+='<div style="position:relative;height:40px;margin:0 2px">'
+   +'<div style="position:absolute;left:0;right:0;top:12px;height:8px;background:var(--line);border-radius:4px"></div>'
+   +(g1!=null?'<div style="position:absolute;top:7px;height:3px;border-radius:2px;background:var(--amber);opacity:.85;left:'+g1+'%;width:'+Math.max(g2-g1,1.5)+'%"></div>':'')
+   +[25,50,75].map(q=>'<div style="position:absolute;top:9px;height:14px;width:1.5px;background:var(--ink3);opacity:.55;left:'+q+'%"></div>').join('')
+   +(pct!=null?'<div style="position:absolute;top:21px;left:'+clamp(pct,0,100)+'%;transform:translateX(-50%);color:var(--amber);font-size:1.05rem;line-height:1">▲</div>':'')
+   +'</div>';
+  // tick labels: what the user actually reads — 上位% among Yoshiwara soap workers
+  h+='<div style="position:relative;height:28px;margin:0 2px;font-family:var(--mono);font-size:.6rem;color:var(--ink3)">'
+   +[[25,'上位75%',p25],[50,'上位50%',p50],[75,'上位25%',p75]].map(a=>'<div style="position:absolute;left:'+a[0]+'%;transform:translateX(-50%);text-align:center;line-height:1.5">'+a[1]+'<br>'+yen(a[2])+'</div>').join('')
+   +'</div>';
+  // prediction, surfaced as an intuitive message (not a technical label)
+  if(myRate!=null&&pred){
+    let msg;
+    if(myRate<pred.lo)msg='いまの単価は、あなたの条件からの目安(細い線)より低めです。<b>過小評価されているかもしれません</b> — 交渉の材料になります。';
+    else if(myRate>pred.hi)msg='いまの単価は、あなたの条件からの目安(細い線)より高めです。<b>良い条件を得られています</b> — 維持する材料になります。';
+    else msg='いまの単価は、あなたの条件からの目安(細い線)の範囲内です。';
+    h+='<p style="font-size:.86rem;margin-top:12px">'+msg+'</p>';
+  }else if(pred){
+    h+='<p class="muted" style="font-size:.8rem;margin-top:12px">細い線は、あなたの条件からの目安('+yen(pred.lo)+'〜'+yen(pred.hi)+')の位置です。</p>';
+  }
+  h+='<p class="muted" style="font-size:.72rem;margin-top:10px">目安は市場の傾向の足し算で、あなたの価値の優劣を意味しません。</p>';
+  h+='<div class="row" style="justify-content:space-between;margin-top:12px;align-items:center">'
+   +'<span class="muted" style="font-size:.74rem">もと: '+(prior?("作成者による仮の目安(実データN="+dist.n+")"):("実データ N="+dist.n))+'</span>'
+   +'<button class="btn ghost sm" onclick="toggleBenchDetail()">'+(ui.benchDetail?"くわしくを閉じる":"くわしく(分布を見る)")+'</button></div>';
+  h+='</div>';
+  return h;
+}
+function toggleBenchDetail(){ui.benchDetail=!ui.benchDetail;refreshBenchResult();}
+function benchResultHTML(){
+  const f=ui.bench;
+  const dist=cellDistribution(f.biz);
+  const myRate=computeRate(f);
+  const pred=predictRange(f);
+  // default: band + pin (intuitive). analytic histogram + stats behind くわしく.
+  let h=bandCard(dist,myRate,pred);
+  if(ui.benchDetail){
+    h+='<div class="sec-h">分布のくわしく</div>';
+    h+=distChart(dist,myRate,pred);
+    const badgeCls=dist.gate==="full"?"sage":dist.gate==="partial"?"amber":"rose";
+    h+='<div class="banner '+badgeCls+'">信頼度: <b>'+esc(dist.confidence)+'</b>（この条件の実データ提供数 N='+dist.n+'）'
+     +(dist.gate==="prior"?'　— まだ公開相場の目安が中心です。あなたの提供がこの分布を育てます。':"")+'</div>';
+    if(myRate!=null){
+      const pct=positionPercentile(dist.combined,myRate);
+      h+='<div class="card"><b style="font-size:.95rem">あなたの実際の売上単価: '+yen(myRate)+' / 時間</b>'
+       +'<p style="font-size:.92rem;margin-top:6px">この条件のなかで、あなたはおよそ<b>上位'+Math.max(1,Math.round(100-pct))+'%</b>の位置です。中央値(P50)は'+yen(percentileFromBins(dist.combined,0.5))+'、上位25%(P75)は'+yen(percentileFromBins(dist.combined,0.75))+'。</p>'
+       +(myRate<pred.lo?'<div class="note">あなたの実単価は市場推定レンジの下限を下回っています。交渉や条件の見直しを検討する根拠になりえます。</div>':myRate>pred.hi?'<div class="note">あなたの実単価は市場推定レンジを上回っています。良い条件です。維持する材料になります。</div>':'<div class="note">あなたの実単価は市場推定レンジの中に収まっています。</div>')
+       +'</div>';
+    }
+    // ヒストグラム・信頼度のみ。推定は提供後の報酬として下で出す。
+  }
+  // 推定レンジ: mine存在かつ justContributed でない場合に常時表示。
+  // justContributed 直後は提供パネル内で報酬表示するため重複しない。
+  const _mine=ensureBench().mine;
+  if(_mine&&myRate!=null&&!ui.justContributed)h+=predictionCard(f,pred);
+  h+=giveSection(f,myRate,dist);
+  return h;
+}
+function predictionCard(f,pred){
+  const m=ensureModel();
+  let h='<div class="card" style="border:1px solid var(--amber);background:#FFFDF8">'
+   +'<div class="eyebrow" style="color:var(--ambertext)">PREDICTION</div>'
+   +'<b style="font-family:var(--serif);font-size:1.5rem;display:block;margin:2px 0 1px">市場推定レンジ: '+yen(pred.lo)+' 〜 '+yen(pred.hi)+'</b>'
+   +'<div class="muted" style="margin-bottom:10px">/ 時間　— 交渉のたたき台です。あなたの価値の断定ではありません。</div>';
+  // reliability annotations (3 layers)
+  h+='<div style="display:flex;flex-direction:column;gap:7px;font-size:.82rem">';
+  // 1. model provenance
+  h+='<div class="row" style="gap:7px"><span class="pill" style="background:'+(pred.calibrated?"var(--sage2)":"var(--amber2)")+';color:'+(pred.calibrated?"var(--teal)":"var(--ambertext)")+'">'+(pred.calibrated?"実データ較正済(N="+pred.calibN+")":"暫定係数(未較正)")+'</span>'
+   +'<span class="muted">'+(pred.calibrated?"この業態の実データで係数が更新されています":"公開相場＋合成データ由来の仮の係数です")+'</span></div>';
+  // 2. input completeness
+  const ipct=Math.round(pred.answered/pred.total*100);
+  h+='<div><div class="muted" style="margin-bottom:3px">入力充足度: '+pred.answered+'/'+pred.total+'項目 ('+ipct+'%) — 情報が増えるほどレンジが絞れます</div>'
+   +'<div class="gauge" style="margin:0"><div class="track" style="height:8px"><div class="fill" style="height:8px;width:'+clamp(ipct,3,100)+'%;background:var(--sage)"></div></div></div></div>';
+  // 3. calibration progress
+  const cpct=Math.min(100,Math.round(dist_n(f.biz)/CALIB_MIN_N*100));
+  h+='<div><div class="muted" style="margin-bottom:3px">較正進捗: この業態の実データ '+dist_n(f.biz)+' 件 / 較正に必要な '+CALIB_MIN_N+' 件 ('+cpct+'%)</div>'
+   +'<div class="gauge" style="margin:0"><div class="track" style="height:8px"><div class="fill" style="height:8px;width:'+clamp(cpct,3,100)+'%;background:'+(cpct>=100?"var(--sage)":"var(--amber)")+'"></div></div></div></div>';
+  h+='</div>';
+  h+='<div class="note" style="margin-top:12px">この推定は、各項目の寄与を足し合わせた<b>透明な計算</b>です(ブラックボックスではありません)。仕組みの説明と基準相場の調整は「この道具について」にあります。実データが'+CALIB_MIN_N+'件を超えると自動で見直されます。身体的な項目を含みますが、これは市場の傾向の記述であって、あなたの価値の優劣を意味しません。</div>';
+  h+='</div>';
+  return h;
+}
+function dist_n(biz){return allRecords().filter(r=>r.biz===biz&&r.rate>0).length;}
+function refreshBenchResult(){const b=$("benchResult");if(b)b.innerHTML=benchResultHTML();}
+
+function distChart(dist,myRate,pred){
+  const c=dist.combined;
+  const max=Math.max(...c,1);
+  const predBin=(pred&&pred.bin!=null)?pred.bin:null;
+  const mineBin=(myRate!=null)?binIndex(myRate):null;
+  let h='<div class="card"><div style="display:flex;align-items:flex-end;gap:2px;height:140px;padding-top:18px;margin-bottom:12px;position:relative">';
+  for(let i=0;i<c.length;i++){
+    // min visible height: bins holding YOUR rate or the prediction must never
+    // be invisible, even when the distribution has zero count there (outlier).
+    const hgt=Math.max(c[i]/max*116,c[i]>0?3:0,(mineBin===i||predBin===i)?5:0);
+    const isMine=mineBin===i;
+    const isPred=predBin===i;
+    // histogram bar: sage default; actual = solid amber; predicted single bin = amber2 tint
+    let bg=isMine?"var(--amber)":(isPred?"var(--amber2)":"var(--sage)");
+    let op=isMine?1:(isPred?0.95:0.5);
+    // markers are separate elements with fixed own colors: ▼(推定)は上・▼色は
+    // 常にambertext、▲(実績)はバーの下・常にamber。同一ビンでも色が混ざらない。
+    h+='<div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;position:relative" title="'+binLabel(i)+(isPred?" ・推定":"")+(isMine?" ・実績":"")+'">'
+     +(isPred?'<div style="position:absolute;top:-16px;font-size:.7rem;color:var(--ambertext)">▼</div>':'')
+     +(isMine?'<div style="position:absolute;bottom:-14px;font-size:.7rem;color:var(--amber)">▲</div>':'')
+     +'<div style="width:100%;height:'+hgt+'px;background:'+bg+';opacity:'+op+';border-radius:2px 2px 0 0'+(isPred&&!isMine?';box-shadow:inset 0 0 0 1.5px var(--ambertext)':'')+'"></div></div>';
+  }
+  h+='</div>';
+  // axis ticks every 10,000円 + endpoints
+  h+=axisTicks();
+  // out-of-range note: rates ≥ BIN_MAX are folded into the last "¥80k〜" bin
+  if(myRate!=null&&myRate>=BIN_MAX){
+    h+='<p class="muted" style="margin-top:6px;font-size:.78rem">あなたの実績('+yen(myRate)+'/時)は表示上限を超えるため、右端の「¥'+(BIN_MAX/1000)+'k〜」に含めて表示しています。</p>';
+  }
+  // legend — one glyph per item
+  let leg=[];
+  if(myRate!=null)leg.push('<span style="color:var(--amber)">▲</span> 実績(あなた)');
+  if(predBin!=null)leg.push('<span style="color:var(--ambertext)">▼</span> 市場推定');
+  h+=(leg.length?'<p class="muted" style="margin-top:8px">'+leg.join("　")+'</p>':"")+'</div>';
+  return h;
+}
+function axisTicks(){
+  // label ticks at 0,10k,20k,...,60k+ aligned under the bins
+  const step=10000;                 // label every 10,000円
+  const nbins=NBIN;                 // total bins
+  let cells='';
+  for(let i=0;i<nbins;i++){
+    const edge=i*BIN;
+    const show=(edge%step===0);
+    const isLast=(i===nbins-1);
+    cells+='<div style="flex:1;text-align:center;position:relative">'
+      +(show?'<span style="position:absolute;left:0;transform:translateX(-50%);white-space:nowrap">'+ (edge>=BIN_MAX?('¥'+(BIN_MAX/1000)+'k〜'):('¥'+(edge/1000)+'k')) +'</span>':'')
+      +'</div>';
+  }
+  return '<div style="display:flex;gap:2px;font-family:var(--mono);font-size:.58rem;color:var(--ink3);margin-top:6px;height:14px;position:relative">'+cells+'</div>';
+}
+function positionPercentile(counts,rate){
+  const total=counts.reduce((a,b)=>a+b,0);if(total<=0)return 50;
+  const bi=binIndex(rate);let below=0;
+  for(let i=0;i<bi;i++)below+=counts[i];
+  below+=counts[bi]/2;
+  return clamp(below/total*100,0,100);
+}
+function computeRate(f){
+  const course=parseFloat(String(f.course).replace(/[,，]/g,""));
+  const mins=parseFloat(String(f.mins).replace(/[,，]/g,""));
+  if(isNaN(course)||isNaN(mins)||mins<=0||course<=0)return null;
+  return course/mins*60;
+}
+/* business select changes the distribution filter; refresh result only */
+function setBenchSel(k,v){ui.bench[k]=v;persist();refreshBenchResult();}
+/* area/tier are explanatory now (not filters); tap toggles, re-render to update button states */
+function setBenchArea(a){ui.bench.area=(ui.bench.area===a?"":a);persist();render();}
+function setBenchTier(t){ui.bench.tier=(ui.bench.tier===t?"":t);persist();render();}
+/* number input: update ONLY the result area to preserve typing focus */
+function onBenchNum(){
+  ui.bench.course=val("bc_course");
+  ui.bench.mins=val("bc_mins");
+  persist();
+  refreshBenchResult();
+}
+/* driver tap: toggle + refresh result only */
+function pickBench(did,i){
+  if(!ui.bench.drivers)ui.bench.drivers={};
+  if(ui.bench.drivers[did]===i)delete ui.bench.drivers[did];
+  else ui.bench.drivers[did]=i;
+  persist();
+  // driver buttons live in the main card, not in benchResult → re-render whole view,
+  // but tap doesn't involve text typing so focus loss is irrelevant here.
+  render();
+}
+/* ---- give-to-get: contribute anonymized record, see your position ---- */
+function kAnonymityCount(f){
+  // k-anonymity proxy: records sharing the same business (the only filter now)
+  return allRecords().filter(r=>r.biz===f.biz).length;
+}
+/* contribution sits behind a one-line expander. The informed-consent content
+   (shared-data preview, k-anonymity warning, benefits) appears in full at the
+   moment of decision — default screen stays short, consent gets full focus. */
+function giveSection(f,myRate,dist){
+  const mine=ensureBench().mine;
+  if(!ui.giveOpen){
+    const status=mine?'✓ 提供済み(開くと更新できます)':('いまの実データ N='+dist.n+' — あなたの1件が、目安を実態に近づけます');
+    return '<div class="card" style="padding:0;overflow:hidden"><button onclick="toggleGive()" style="width:100%;text-align:left;background:transparent;border:none;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px">'
+     +'<span><b style="font-size:.92rem">🌱 この帯を育てる(匿名で提供・任意)</b><br><span class="muted" style="font-size:.8rem">'+status+'</span></span>'
+     +'<span style="color:var(--ink2);font-size:1rem">›</span></button></div>';
+  }
+  return giveToGet(f,myRate,dist)
+   +'<div class="toolbar" style="margin-top:8px"><button class="btn ghost sm" onclick="toggleGive()">閉じる</button></div>';
+}
+function toggleGive(){ui.giveOpen=!ui.giveOpen;refreshBenchResult();}
+function giveToGet(f,myRate,dist){
+  let h='<div class="sec-h">この分布を育てる(任意の匿名提供)</div>';
+  if(myRate==null){
+    return h+'<div class="empty">先にあなたの売上単価を入力すると、匿名提供の準備ができます。</div>';
+  }
+  const b=ensureBench();
+  const already=b.mine&&b.mine.biz===f.biz&&binIndex(b.mine.rate)===binIndex(myRate);
+  const k=kAnonymityCount(f);
+  const rec=buildRecord(f,myRate);
+
+  // POST-CONTRIBUTION panel: the moment right after 提供. Show what changed on
+  // this screen (the payoff = motivation), then the single send action. This
+  // replaces the old two-step "提供→別ボタンで送る" that felt like doing it twice.
+  if(ui.justContributed && already){
+    const url=submitUrl(rec);
+    h+='<div class="card" style="border-color:var(--teal)">'
+     +'<div class="eyebrow" style="color:var(--teal)">✓ この端末に反映しました</div>'
+     +'<b style="font-size:1.05rem;display:block;margin:4px 0 8px">あなたの1件で、この帯が動きました</b>'
+     +'<ul class="pts" style="font-size:.86rem">'
+     +'<li>この条件の実データ: <b>N='+dist.n+'</b> になりました</li>'
+     +'<li>信頼度: <b>'+esc(dist.confidence)+'</b></li>'
+     +'</ul>'
+     +'<p class="muted" style="font-size:.8rem;margin-top:8px">ここまでは<b>あなたの端末の中だけ</b>の変化です。</p>'
+     +'</div>';
+    const _jcPred=predictRange(f);
+    h+=predictionCard(f,_jcPred);
+    h+='<div class="card">'
+     +'<p class="muted" style="font-size:.8rem;margin-bottom:8px">みんなの分布に反映するには、最後にひとつ——匿名の集約先に送ります(任意)。</p>'
+     +'<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:12px">'
+     +'<p class="muted" style="font-size:.8rem;margin-bottom:8px">アプリは送信しません。下をタップすると、丸めた内容が<b>あなたのブラウザ</b>で匿名フォームに運ばれます(名前・メール不要)。届いた内容は作成者が確認し、およそ1週間以内に次の版へ反映され、この帯の「実データN」が増えます。</p>'
+     +'<div class="row" style="gap:8px;flex-wrap:wrap">';
+    if(url)h+='<a class="btn amber sm" target="_blank" rel="noopener" style="text-decoration:none" onclick="markSent()" href="'+esc(url)+'">匿名フォームで送って完了</a>';
+    h+='<button id="recCopyBtn" class="btn ghost sm" onclick="copyRecord()">内容をコピー(他の窓口用)</button>'
+     +'<button class="btn ghost sm" onclick="dismissContributed()">'+(url?'あとで送る':'閉じる')+'</button></div>';
+    if(!url)h+='<p class="muted" style="font-size:.76rem;margin-top:6px">匿名フォームは準備中です。コピーして、信頼できる窓口(支援団体・匿名メッセージ等)に貼って送れます。</p>';
+    h+='</div></div>';
+    return h;
+  }
+
+  h+='<div class="card">'
+   +'<p style="font-size:.9rem">あなたの情報を<b>2,500円のレンジに丸めた匿名データ</b>として提供すると、同じ条件の分布が育ちます。提供は任意で、出すのは下のプレビュー内容だけ。<b>正確な金額や個票は端末に残り、送信されません。</b></p>';
+
+  // optional share opt-in (default OFF; only when the split module has data)
+  if(shareRate()!=null){
+    const sb=shareBand(shareRate());
+    h+='<div style="margin:12px 0 0"><label style="display:flex;align-items:flex-start;gap:9px;cursor:pointer;font-size:.86rem">'
+     +'<input type="checkbox" '+(ui.includeShare?"checked":"")+' onchange="toggleShare(this.checked)" style="margin-top:3px">'
+     +'<span>取り分('+shareBandLabel(sb)+'に丸め)も含める<br><span class="muted" style="font-size:.76rem">取り分は店ごとの条件なので、細かい率は出しません。含めなくても提供できます。</span></span></label></div>';
+  }
+  // preview exactly what would be shared
+  h+='<div style="margin:12px 0"><div class="eyebrow" style="margin-bottom:6px">提供される内容(これだけ)</div><pre class="out" style="font-size:.74rem">'+esc(recordPreview(rec))+'</pre></div>';
+
+  // WHAT YOU GET — the benefit must be visible, not just altruism. Contributing
+  // updates the very numbers on this screen, immediately.
+  if(!already){
+    const n2=dist.n+1;
+    const conf2=n2>=30?"実データ十分":n2>=10?"参考値・サンプル少":"仮の目安ベース(実データ不足)";
+    const confUp=conf2!==dist.confidence;
+    const nextTh=dist.n<10?10:dist.n<30?30:null;
+    const confLine=confUp?('信頼度: '+esc(dist.confidence)+' → <b>'+esc(conf2)+'</b> に上がります')
+      :(nextTh?('信頼度: '+esc(dist.confidence)+'(あと'+(nextTh-dist.n)+'件でひとつ上がります)')
+      :('信頼度: '+esc(dist.confidence)+'(最高水準を維持)'));
+    const cn=dist_n(f.biz), cnow=Math.min(100,Math.round(cn/CALIB_MIN_N*100)), cafter=Math.min(100,Math.round((cn+1)/CALIB_MIN_N*100));
+    h+='<div style="margin:12px 0"><div class="eyebrow" style="margin-bottom:6px">提供すると、この画面がその場で変わります</div>'
+     +'<ul class="pts" style="font-size:.84rem">'
+     +'<li>この条件の実データ: <b>N='+dist.n+' → '+n2+'</b>。あなたの見ている分布が、求人広告の目安から実態へ一歩近づきます。</li>'
+     +'<li>'+confLine+'</li>'
+     +'<li>推定レンジの較正進捗: <b>'+cnow+'% → '+cafter+'%</b>('+CALIB_MIN_N+'件で係数が実データで見直され、推定があなたたちの現実に合っていきます)</li>'
+     +'</ul>'
+     +'<p class="muted" style="font-size:.78rem;margin-top:4px">相場の情報はこれまで、店や媒体の側だけが持っていました。匿名の持ち寄りは、それを当事者の手に取り戻す仕組みです。あなたの1件も、書き出せば信頼できる集約先で他の人の分布を育てます。</p></div>';
+  }
+
+  // k-anonymity gate — but never a hard deadlock: early contributors can opt in with informed consent.
+  if(k < 4){
+    h+='<div class="banner amber">この条件で提供済みの人はまだ<b>'+k+'人</b>です。最初の数人は「自分が含まれている」と推測される可能性がやや高くなります。それを理解した上で、最初の一人として分布を立ち上げることもできます（出すのは丸めたレンジのみ・正確な金額は出ません）。</div>'
+     +'<div class="row"><button class="btn amber" onclick="contributeEarly()">'+(already?"記録を更新する":"この端末に記録する")+'</button>'
+     +'<button class="btn ghost" onclick="exportRecord()">提供せず、レコードを書き出すだけ</button></div>';
+  }else{
+    h+='<div class="banner sage">この条件には既に'+k+'人の提供があり、あなたのデータは十分に埋もれます(匿名性が保たれます)。</div>'
+     +'<div class="row"><button class="btn amber" onclick="contribute()">'+(already?"記録を更新する":"この端末に記録する")+'</button>'
+     +'<button class="btn ghost" onclick="exportRecord()">提供せず、レコードを書き出すだけ</button></div>';
+  }
+  if(already){
+    h+='<p class="muted" style="margin-top:8px">提供済み: 同じ条件・同じレンジで登録されています。条件を変えて再提供すると上書きされます(同一端末は1件)。</p>';
+    h+=sendSection(rec);   // lets an already-contributed user re-open the send door
+  }
+  h+='</div>';
+
+  // manual-merge note (no central server)
+  h+='<div class="note">このα版には集約サーバーがありません。提供データはこの端末に残り、送るかどうか・どの窓口に送るかは、あなたがその都度選びます。</div>';
+  return h;
+}
+/* 「送る」扉 — アプリは送信しない。本人のブラウザでフォームが開くだけ。
+   フォーム未設定(HUB空)のときはコピーのみ表示。 */
+function submitUrl(rec){
+  if(!HUB.submitFormUrl||!HUB.submitEntryId)return null;
+  // 送るのは実測(丸めたビン+属性)だけ。含めないもの: rate(正確な金額)、
+  // key(端末キー=追跡になりうる)、市場推定(モデル出力を入力に回帰させない)。
+  const payload=JSON.stringify(Object.assign({v:1,biz:rec.biz,bin:rec.binLabel,area:rec.area||"",tier:rec.tier||"",drivers:rec.drivers,ts:rec.ts},rec.share!=null?{share:rec.share}:{}));
+  return HUB.submitFormUrl+(HUB.submitFormUrl.includes("?")?"&":"?")+"usp=pp_url&"+HUB.submitEntryId+"="+encodeURIComponent(payload);
+}
+function recKey(rec){return rec.biz+"|"+rec.bin+"|"+(rec.share!=null?rec.share:"");}
+function markFormSent(rec){if(!rec)return;ensureBench().sentKey=recKey(rec);persist();setTimeout(refreshBenchResult,400);}
+function sendSection(rec){
+  const url=submitUrl(rec);
+  const sent=ensureBench().sentKey===recKey(rec);
+  let h='<div style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">'
+   +'<div class="eyebrow" style="margin-bottom:6px">集約先に送る(任意)</div>';
+  if(sent){
+    // same-content resend is suppressed on this device. Updating the record
+    // (different bin) legitimately re-enables sending.
+    h+='<p style="font-size:.86rem">✓ この内容は<b>送信済み</b>です。同じ内容を重ねて送る必要はありません。</p>'
+     +'<p class="muted" style="font-size:.76rem;margin-top:6px">単価や条件が変わって提供を更新したときは、また送れるようになります。(アプリはフォームの送信完了までは確認できないため、「送る」をタップした時点で送信済みの扱いにしています)</p>';
+    h+='</div>';
+    return h;
+  }
+  h+='<p class="muted" style="font-size:.8rem;margin-bottom:8px">アプリは送信しません。下をタップすると、上のプレビューと同じ内容が<b>あなたのブラウザ</b>で匿名窓口に運ばれます。名前もメールアドレスも要りません。送るのは一度だけで大丈夫。</p>'
+   +'<div class="row" style="gap:8px;flex-wrap:wrap">';
+  if(url)h+='<a class="btn amber sm" target="_blank" rel="noopener" style="text-decoration:none" href="'+esc(url)+'" onclick="markFormSent(curSendRec())">匿名フォームで送る</a>';
+  h+='<button id="recCopyBtn" class="btn ghost sm" onclick="copyRecord()">内容をコピー(他の窓口用)</button></div>';
+  if(!url)h+='<p class="muted" style="font-size:.76rem;margin-top:6px">匿名フォームは準備中です。コピーして、信頼できる窓口(支援団体・匿名メッセージ等)に貼って送れます。</p>';
+  h+='</div>';
+  return h;
+}
+function toggleShare(on){ui.includeShare=!!on;refreshBenchResult();}
+function curSendRec(){const f=ui.bench;const r=computeRate(f);return r!=null?buildRecord(f,r):null;}
+function copyRecord(){
+  const f=ui.bench,myRate=computeRate(f);if(myRate==null)return;
+  const rec=buildRecord(f,myRate);
+  const t=JSON.stringify({v:1,biz:rec.biz,bin:rec.binLabel,area:rec.area||"",tier:rec.tier||"",drivers:rec.drivers,ts:rec.ts});
+  const btn=document.getElementById("recCopyBtn");
+  const ok=()=>{if(btn){btn.textContent="✓ コピーしました";setTimeout(()=>{btn.textContent="内容をコピー(他の窓口用)";},2200);}};
+  const fb=()=>{try{const ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();const done=document.execCommand("copy");document.body.removeChild(ta);done?ok():(btn&&(btn.textContent="コピーできない環境です"));}catch(e){if(btn)btn.textContent="コピーできない環境です";}};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok).catch(fb);}else fb();
+}
+/* 取り分(手取り÷総額)を5%きざみの帯に丸める。細かい率は店の特定に
+   つながりうるため、粗い帯しか扱わない(既定オフのオプトイン)。 */
+function shareRate(){
+  const sp=state.split||{};
+  const c=sp.customer!==""&&sp.customer!=null?parseFloat(String(sp.customer).replace(/[,，]/g,"")):null;
+  const y=sp.you!==""&&sp.you!=null?parseFloat(String(sp.you).replace(/[,，]/g,"")):null;
+  if(c==null||y==null||!(c>0)||!(y>=0)||y>c)return null;
+  return y/c*100;
+}
+function shareBand(pct){return Math.floor(pct/5)*5;}
+function shareBandLabel(b){return b+"〜"+(b+5)+"%帯";}
+function buildRecord(f,rate){
+  // area & tier are now explanatory attributes (stored alongside ordinal drivers)
+  const attrs=(ui.bench&&ui.bench.drivers&&Object.keys(ui.bench.drivers).length)?{...ui.bench.drivers}:{};
+  return {
+    biz:f.biz,                       // the only cell key (distribution filter)
+    area:f.area||"", tier:f.tier||"",// explanatory attributes (not filters)
+    rate:rate,                       // kept locally (for own position)
+    bin:binIndex(rate),              // what actually matters for sharing
+    binLabel:binLabel(binIndex(rate)),
+    drivers:attrs,                   // ordinal self-report (for future elasticity)
+    ts:new Date().toISOString().slice(0,7), // month granularity only
+    share:(ui.includeShare&&shareRate()!=null)?shareBand(shareRate()):null, // 任意・5%帯
+    key:deviceKey()                  // idempotency only; not personally identifying
+  };
+}
+function recordPreview(rec){
+  // show exactly what's shared, in plain words (no internal field names)
+  const names=Object.keys(rec.drivers).map(id=>{
+    const d=BDRIVERS.find(x=>x.id===id);
+    if(!d)return id;
+    const v=rec.drivers[id];
+    return d.label+" = "+(d.opts[v]!=null?d.opts[v]:v);
+  });
+  return "はたらき方: "+rec.biz
+    +"\n売上単価: "+rec.binLabel+" の幅だけ(正確な金額は出ません)"
+    +"\nエリア: "+(rec.area||"未回答")+" / 店格: "+(rec.tier||"未回答")
+    +"\n答えた項目: "+(names.length?names.join("、"):"なし")
+    +(rec.share!=null?("\n取り分: "+shareBandLabel(rec.share)+"(5%きざみに丸め)"):"")
+    +"\n時期: "+rec.ts+"(月単位)"
+    +"\n\n含まれないもの: 正確な金額・店名・名前・連絡先・端末を特定する情報・細かい取り分の率(5%に丸めます)・市場推定の数字(モデルの出力は送りません。送るのはあなたの実測だけ)";
+}
+function deviceKey(){
+  // random per-install key, stored locally; used only to make re-submission idempotent
+  if(!state.deviceKey)state.deviceKey="d"+Math.random().toString(36).slice(2,10);
+  return state.deviceKey;
+}
+function contribute(){
+  const f=ui.bench;const rate=computeRate(f);if(rate==null)return;
+  const b=ensureBench();
+  b.mine=buildRecord(f,rate);   // idempotent: replaces this device's own record
+  autoCalibrate();
+  ui.justContributed=true;      // triggers the post-contribution result+send panel
+  commit();
+  refreshBenchResult();
+}
+function contributeEarly(){
+  // k匿名警告は直前のバナーで提示済み。ボタンタップ=読んだ上での記録。
+  // confirm()は同じ意思決定の重複なので廃止。
+  contribute();
+}
+function markSent(){
+  // 送信済みの記録は sentKey に一本化(記録直後パネル経由でも、後日の
+  // 送信セクション側の重複抑制が効くように)。mine.sent は互換のため維持。
+  ui.justContributed=false;ui.giveOpen=false;
+  const r=curSendRec();if(r)ensureBench().sentKey=recKey(r);
+  if(ensureBench().mine)ensureBench().mine.sent=true;
+  persist();setTimeout(refreshBenchResult,50);
+}
+function dismissContributed(){ui.justContributed=false;refreshBenchResult();}
+function exportRecord(){
+  const f=ui.bench;const rate=computeRate(f);if(rate==null)return;
+  const rec=buildRecord(f,rate);
+  // strip exact rate from the shared artifact — share only the bin
+  const shareable={biz:rec.biz,area:rec.area,tier:rec.tier,bin:rec.bin,binLabel:rec.binLabel,drivers:rec.drivers,ts:rec.ts,key:rec.key};
+  const blob=new Blob([JSON.stringify(shareable,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="compass-record-"+rec.ts.replace(/-/g,"")+".json";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  alert("レコードを書き出しました。丸めたレンジのみを含み、正確な金額は含みません。");
+}
+
+/* ============================================================
+   DEV / DEMO — synthetic data generator for testing.
+   Generates correlated records so distributions & (future)
+   elasticity behave realistically. Clearly labelled as dummy.
+   ============================================================ */
+const DEMO_STEPS=(()=>{
+  const a=[];
+  for(let n=25;n<=100;n+=25)a.push(n);
+  for(let n=200;n<=1000;n+=100)a.push(n);
+  return a;          // 25,50,75,100,200,...,1000
+})();
+
+/* deterministic PRNG so the same N reproduces the same dataset */
+function mulberry32(seed){
+  return function(){
+    seed|=0; seed=seed+0x6D2B79F5|0;
+    let t=Math.imul(seed^seed>>>15,1|seed);
+    t=t+Math.imul(t^t>>>7,61|t)^t;
+    return ((t^t>>>14)>>>0)/4294967296;
+  };
+}
+function gauss(rng){ // Box-Muller
+  let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+}
+function pick(rng,arr){return arr[Math.floor(rng()*arr.length)];}
+
+/* transparent synthetic rate model (for demo realism only) */
+const TIER_EFFECT={"一般":0,"中級":4000,"高級":12000};
+const AREA_EFFECT={"吉原":5000,"新宿・歌舞伎町":2500,"川崎・堀之内":2500,"横浜":1500,"渋谷":2500,"池袋":1200,"錦糸町":800,"鶯谷":-500,"西川口":-1500,"大宮":0,"千葉・栄町":-800,"その他関東":-1500};
+/* Target distribution of 売上単価 (円/時) by ascending percentile:
+   p01=10,000 / p10=15,000 / p50=20,000 / p90=40,000 / p99=75,000.
+   We interpolate a quantile function (inverse-CDF) through these anchors
+   in log-space for a smooth right-skewed shape, then map a uniform draw u
+   (made to correlate with attributes) through it. */
+const Q_ANCHORS=[[0.00,78000],[0.01,75000],[0.10,40000],[0.50,20000],[0.90,15000],[0.99,10000],[1.00,8000]];
+function quantileRate(u){
+  u=Math.max(0,Math.min(1,u));
+  for(let i=0;i<Q_ANCHORS.length-1;i++){
+    const [p0,v0]=Q_ANCHORS[i], [p1,v1]=Q_ANCHORS[i+1];
+    if(u<=p1){
+      const t=(u-p0)/(p1-p0||1);
+      // interpolate in log space for smooth multiplicative tail
+      const lv=Math.log(v0)+(Math.log(v1)-Math.log(v0))*t;
+      return Math.exp(lv);
+    }
+  }
+  return Q_ANCHORS[Q_ANCHORS.length-1][1];
+}
+/* attribute score in [0,1]: higher attributes => higher percentile (correlation).
+   Keeps the prediction model meaningful while matching the target marginals. */
+function attrScore(biz,area,tier,dr){
+  let s=0,w=0;
+  const addO=(id,wt)=>{ if(dr[id]!=null){ s+=(dr[id]/(driverMax(id)||1))*wt; w+=wt; } };
+  addO("repeat",3); addO("fill",2); addO("skill",2); addO("bust",1.5);
+  addO("exp",1.2); addO("option",1.2); addO("diary",1); addO("height",0.6);
+  // tier & area push the score up
+  const tierB={"一般":0,"中級":0.12,"高級":0.28}[tier]||0;
+  const areaB=({"吉原":0.12,"新宿・歌舞伎町":0.06,"川崎・堀之内":0.06,"渋谷":0.06,"横浜":0.03,"池袋":0.03}[area]||0);
+  const bizB=({"ソープランド":0.15,"SMクラブ":0.05,"デリヘル":0.0,"ホテヘル":0.0,"店舗型ヘルス":-0.02,"人妻系":-0.05,"エステ・メンズ系":-0.08,"ピンサロ":-0.12}[biz]||0);
+  let base=w>0?s/w:0.5;            // 0..1 from attributes
+  return Math.max(0,Math.min(1, base*0.7 + tierB + areaB + bizB + 0.15));
+}
+function driverMax(id){const d=BDRIVERS.find(x=>x.id===id);return d?d.opts.length-1:1;}
+/* Generate rates for a batch so the population marginals match the target
+   quantiles EXACTLY (via rank-normalization), while preserving correlation
+   with attributes (higher attrs => higher rate). */
+function synthRateRanked(records,rng){
+  // 1) raw correlation signal per record: attribute score + noise
+  const sig=records.map(r=>{
+    const score=attrScore(r.biz,r.area,r.tier,r.dr);  // 0..1
+    return 0.6*score + 0.4*rng();                      // blend (corr + spread)
+  });
+  // 2) rank-normalize signals to uniform percentile u in (0,1).
+  //    Q_ANCHORS map LOW u -> HIGH rate (right-skewed: top earners are few).
+  //    To make higher attributes => higher pay, the HIGHEST signal gets the
+  //    SMALLEST u (which maps to the highest rate).
+  const order=sig.map((s,i)=>[s,i]).sort((a,b)=>a[0]-b[0]);
+  const u=new Array(records.length);
+  order.forEach(([_,idx],rank)=>{ u[idx]=1-((rank+0.5)/records.length); });
+  // 3) map through the target quantile function
+  return u.map(uu=>Math.max(2000, Math.round(quantileRate(uu)/BIN)*BIN));
+}
+function genDemo(n,seed){
+  const rng=mulberry32(seed||12345);
+  // build records (attributes first), then assign rates via batch rank-normalization
+  const stub=[];
+  for(let i=0;i<n;i++){
+    const biz=pick(rng,BIZ), area=pick(rng,AREA), tier=pick(rng,TIER);
+    const dr={};
+    BDRIVERS.forEach(d=>{ if(rng()>0.15) dr[d.id]=Math.floor(rng()*d.opts.length); });
+    stub.push({biz,area,tier,dr});
+  }
+  const rates=synthRateRanked(stub,rng);
+  const recs=stub.map((s,i)=>{
+    const rate=rates[i];
+    return {biz:s.biz,area:s.area,tier:s.tier,bin:binIndex(rate),rate,binLabel:binLabel(binIndex(rate)),
+      drivers:s.dr,ts:"2026-0"+(1+Math.floor(rng()*6)),key:"demo"+i,demo:true};
+  });
+  return recs;
+}
+/* load/replace the demo portion of the pool (keeps user's own 'mine') */
+function loadDemoN(n){
+  ensureBench();
+  // remove previous demo records, keep real imports & own
+  state.bench.pool=state.bench.pool.filter(r=>!r.demo);
+  if(n>0)state.bench.pool.push(...genDemo(n, 1000+n));
+  state.demoN=n;
+  autoCalibrate();
+  commit();
+}
+function clearDemo(){
+  ensureBench();
+  state.bench.pool=state.bench.pool.filter(r=>!r.demo);
+  state.demoN=0;
+  state.coefs=defaultCoefs();
+  commit();
+}
+function demoCount(){return (state.bench&&state.bench.pool)?state.bench.pool.filter(r=>r.demo).length:0;}
+/* ============================================================
+   PREDICTION MODEL — 市場推定レンジ(交渉のたたき台)
+   Transparent additive linear model. Coefficients start as
+   PROVISIONAL (public-rate + synthetic priors) and get
+   re-calibrated from real contributed data once N is sufficient.
+   ============================================================ */
+
+/* default PROVISIONAL coefficients (illustrative; mirror synth world).
+   per ordinal step of each driver, in JPY/hour. Editable & calibratable. */
+function defaultCoefs(){
+  return {
+    intercept:null, // null => use per-business public-rate center as base
+    /* 属性係数の初期値(円/段) — 2026-07 ユーザー指定値。
+       正: 段が上がるほど単価が上がる想定 / 負: 下がる想定。
+       実データが集まれば較正で上書きされる(手動編集済みlockedは除く)。 */
+    drivers:{age:-500,height:0,weight:-500,bust:1500,exp:500,repeat:500,fill:1500,diary:500,work:500,option:1000,skill:2000},
+    tier:{"一般":0,"中級":2500,"高級":6000},
+    area:{"吉原":3000,"新宿・歌舞伎町":1500,"川崎・堀之内":1500,"横浜":1000,"渋谷":1500,"池袋":800,"錦糸町":500,"鶯谷":-500,"西川口":-1000,"大宮":0,"千葉・栄町":-500,"その他関東":-1000},
+    locked:{}, // coefficient keys the user manually edited; calibration won't overwrite these
+    calib:{}, // per-business: {n, updatedAt} once calibrated
+    sigma:3000 // residual spread (JPY/hr) for the range half-width; shrinks with calibration
+  };
+}
+const CALIB_MIN_N=40; // business needs at least this many real records to calibrate
+
+function ensureModel(){
+  if(!state.coefs)state.coefs=defaultCoefs();
+  if(!state.coefs.locked)state.coefs.locked={};
+  if(!state.coefs.baseOverride)state.coefs.baseOverride={};
+  return state.coefs;
+}
+
+/* point prediction (center) for a given business + attributes.
+   A per-business offset absorbs residual: it shifts the additive sum so that,
+   for a person at the *average attribute profile*, the prediction equals the
+   observed median. This keeps extreme/edited coefficients from running away —
+   if all coefficients are huge, the offset goes negative to pull the whole
+   curve back toward the real data. */
+function businessOffset(biz){
+  const recs=allRecords().filter(r=>r.biz===biz&&r.rate>0);
+  if(recs.length<8) return 0; // not enough data to anchor; rely on public-rate base
+  // observed median rate
+  const rates=recs.map(r=>r.rate).sort((a,b)=>a-b);
+  const obsMed=rates[Math.floor(rates.length/2)];
+  // model's additive prediction at the AVERAGE profile of the observed data
+  const m=ensureModel();
+  const base=priorCenterRate(biz);
+  // average ordinal level per driver across records
+  const avgPred=(()=>{
+    let r=base;
+    Object.keys(m.drivers).forEach(id=>{
+      const vals=recs.filter(x=>x.drivers&&x.drivers[id]!=null).map(x=>x.drivers[id]);
+      if(vals.length){const avg=vals.reduce((s,v)=>s+v,0)/vals.length; r+=m.drivers[id]*avg;}
+    });
+    // average tier/area effect
+    const tierVals=recs.filter(x=>x.tier&&m.tier[x.tier]!=null);
+    if(tierVals.length){r+=tierVals.reduce((s,x)=>s+m.tier[x.tier],0)/tierVals.length;}
+    const areaVals=recs.filter(x=>x.area&&m.area[x.area]!=null);
+    if(areaVals.length){r+=areaVals.reduce((s,x)=>s+m.area[x.area],0)/areaVals.length;}
+    return r;
+  })();
+  return obsMed-avgPred; // shift that makes avg-profile prediction == observed median
+}
+function predictRate(f){
+  const m=ensureModel();
+  let r = (m.intercept!=null) ? m.intercept : priorCenterRate(f.biz);
+  const d=f.drivers||{};
+  Object.keys(m.drivers).forEach(id=>{ if(d[id]!=null) r += m.drivers[id]*d[id]; });
+  if(f.tier && m.tier[f.tier]!=null) r += m.tier[f.tier];
+  // Light版: エリアは吉原固定で、その加算は基準の相場(¥19,000)に畳み込み済み。
+  // ここで重ねて足すと二重計上になるため加算しない。
+  // residual-absorbing offset (anchors to observed median; counters extreme coefficients)
+  r += businessOffset(f.biz);
+  // safety clamp: never predict far outside the observed data range when data exists
+  const recs=allRecords().filter(x=>x.biz===f.biz&&x.rate>0);
+  if(recs.length>=8){
+    const rates=recs.map(x=>x.rate).sort((a,b)=>a-b);
+    const lo=rates[0], hi=rates[rates.length-1];
+    const pad=(hi-lo)*0.5||5000;
+    r=clamp(r, Math.max(2000,lo-pad), hi+pad);
+  }
+  return Math.max(2000, r);
+}
+/* answered-driver count for input-completeness annotation */
+function answeredCount(f){
+  let n=0; const d=f.drivers||{};
+  BDRIVERS.forEach(x=>{ if(d[x.id]!=null) n++; });
+  if(f.tier) n++;
+  return n;
+}
+const TOTAL_INPUTS=()=>BDRIVERS.length+1; // +tier(エリアは吉原固定)
+
+/* range = center ± half-width. Half-width widens when few inputs answered
+   and narrows as the business gets calibrated with real data. */
+function predictRange(f){
+  const m=ensureModel();
+  const center=predictRate(f);
+  const answered=answeredCount(f), total=TOTAL_INPUTS();
+  const calibrated=!!(m.calib[f.biz]&&m.calib[f.biz].n>=CALIB_MIN_N);
+  // The estimate maps to the SINGLE bin (2,500円幅) that contains the center.
+  const bi=binIndex(center);
+  const lo=bi*BIN;
+  const hi=(bi*BIN>=BIN_MAX)?BIN_MAX:lo+BIN;
+  return {
+    lo, hi,
+    center:Math.round(center/BIN)*BIN,
+    bin:bi,
+    answered, total, calibrated,
+    calibN:(m.calib[f.biz]?m.calib[f.biz].n:0)
+  };
+}
+
+/* ---- calibration from real (non-demo? include all contributed) data ----
+   Simple per-driver least-squares-ish update: for each driver, regress
+   residual (rate - base) on the ordinal level using covariance/variance.
+   Transparent & explainable; not a black box. */
+function calibrateBusiness(biz){
+  const m=ensureModel();
+  const recs=allRecords().filter(r=>r.biz===biz && r.rate>0);
+  if(recs.length<CALIB_MIN_N) return {ok:false,n:recs.length,need:CALIB_MIN_N};
+  const base=priorCenterRate(biz);
+  // For each driver, estimate slope = cov(level, residual)/var(level)
+  const newDrivers={...m.drivers};
+  Object.keys(m.drivers).forEach(id=>{
+    if(m.locked&&m.locked["driver:"+id])return; // respect manual edits
+    const pts=recs.filter(r=>r.drivers&&r.drivers[id]!=null).map(r=>({x:r.drivers[id],y:r.rate-base}));
+    if(pts.length>=CALIB_MIN_N*0.5){
+      const mx=pts.reduce((s,p)=>s+p.x,0)/pts.length;
+      const my=pts.reduce((s,p)=>s+p.y,0)/pts.length;
+      let cov=0,varx=0;
+      pts.forEach(p=>{cov+=(p.x-mx)*(p.y-my);varx+=(p.x-mx)*(p.x-mx);});
+      if(varx>0){
+        const slope=cov/varx;
+        // blend with prior (shrinkage) to avoid overfitting small N
+        const w=Math.min(pts.length/(pts.length+30),0.85);
+        newDrivers[id]=Math.round(m.drivers[id]*(1-w)+slope*w);
+      }
+    }
+  });
+  // residual sigma after fit (for range half-width) — include the anchoring offset
+  m.drivers=newDrivers; // apply first so businessOffset uses fitted coefs
+  const off=businessOffset(biz);
+  const resid=recs.map(r=>{
+    let pred=base+off;
+    Object.keys(newDrivers).forEach(id=>{if(r.drivers&&r.drivers[id]!=null)pred+=newDrivers[id]*r.drivers[id];});
+    if(r.tier&&m.tier[r.tier]!=null)pred+=m.tier[r.tier];
+    if(r.area&&m.area[r.area]!=null)pred+=m.area[r.area];
+    return r.rate-pred;
+  });
+  const sd=Math.sqrt(resid.reduce((s,e)=>s+e*e,0)/resid.length);
+  if(!(m.locked&&m.locked["sigma"]))m.sigma=Math.max(1500,Math.round(sd/100)*100);
+  m.calib[biz]={n:recs.length,updatedAt:new Date().toISOString().slice(0,10)};
+  return {ok:true,n:recs.length,sigma:m.sigma};
+}
+/* auto-calibrate any business that has crossed the threshold */
+function autoCalibrate(){
+  const m=ensureModel();
+  let updated=[];
+  BIZ.forEach(biz=>{
+    const n=allRecords().filter(r=>r.biz===biz&&r.rate>0).length;
+    if(n>=CALIB_MIN_N){
+      const before=m.calib[biz]?m.calib[biz].n:0;
+      if(n!==before){calibrateBusiness(biz);updated.push(biz);}
+    }
+  });
+  return updated;
+}
+
+/* ============================================================
+   COEFFICIENT EDITOR — 計算の中身(透明性の核)
+   Every number feeding the prediction is shown and editable.
+   ============================================================ */
+function vCoef(){
+  const m=ensureModel();
+  let h=modeBanner()
+   +'<div class="eyebrow">Module 03</div><h1>計算の中身を、すべて見せます</h1>'
+   +'<p class="sub">市場推定レンジを作っている数値のすべてです。ブラックボックスはありません。各項目を1段階上げると売上単価(円/時間)がいくら動くか、を表します。実データが集まると自動で見直されますが、ここで手動でも調整できます。</p>'
+   +'<div class="banner amber">初期値は<b>公開相場＋合成データ由来の仮の数字</b>です。あなたの実感や地域の実態に合わせて自由に書き換えてください。</div>';
+
+  // base / intercept — editable initial values
+  h+='<div class="card"><b style="font-size:.92rem">基準値(業態ごとの出発点)</b><div class="muted" style="margin-bottom:8px">どの属性も考えない場合の、業態ごとの売上単価の中心(円/時間)。初期値は公開相場由来の仮の数字です。<b>あなたの地域の実感に合わせて書き換えられます</b>。推定レンジ・分布の形・較正の基準がすべてこの値に従います。</div>';
+  BIZ.forEach(b=>{
+    const cur=priorCenterRate(b);
+    const edited=!!(m.baseOverride&&m.baseOverride[b]!=null);
+    h+='<div class="coefrow"><div class="cr-label">'+esc(b)+(edited?' <span class="pill" style="background:var(--amber2);color:var(--ambertext);font-size:.64rem">編集済</span>':'')
+     +'<small>初期値 '+yen(rawPriorCenterRate(b))+'</small></div>'
+     +'<input class="cr-input" inputmode="numeric" value="'+cur+'" oninput="setBaseRate(\''+b+'\',this.value)"><span class="cr-unit">円/時</span>'
+     +(edited?'<button class="cr-sign" onclick="resetBaseRate(\''+b+'\')" title="初期値に戻す">↺</button>':'')
+     +'</div>';
+  });
+  h+='</div>';
+
+  // driver coefficients (per ordinal step)
+  h+='<div class="sec-h">属性ごとの係数(1段階あたりの増減・円/時間)</div><div class="card">';
+  BDRIVERS.forEach(d=>{
+    const v=m.drivers[d.id]!=null?m.drivers[d.id]:0;
+    const locked=m.locked&&m.locked["driver:"+d.id];
+    h+='<div class="coefrow"><div class="cr-label">'+esc(d.label)+(locked?' <span class="pill" style="background:var(--amber2);color:var(--ambertext);font-size:.64rem">編集済</span>':'')+'<small>'+esc(d.opts[0])+' → '+esc(d.opts[d.opts.length-1])+'</small></div>'
+     +'<button class="cr-sign" onclick="flipDriver(\''+d.id+'\')" title="符号を反転">±</button>'
+     +'<input class="cr-input" inputmode="numeric" value="'+v+'" oninput="setDriverCoef(\''+d.id+'\',this.value)"><span class="cr-unit">円/段</span></div>';
+  });
+  h+='</div>';
+
+  // tier effects
+  h+='<div class="sec-h">店格による加算(円/時間)</div><div class="card">';
+  TIER.forEach(t=>{
+    const v=m.tier[t]!=null?m.tier[t]:0;
+    h+='<div class="coefrow"><div class="cr-label">'+esc(t)+'</div><button class="cr-sign" onclick="flipTier(\''+t+'\')" title="符号を反転">±</button><input class="cr-input" inputmode="numeric" value="'+v+'" oninput="setTierCoef(\''+t+'\',this.value)"><span class="cr-unit">円</span></div>';
+  });
+  h+='</div>';
+
+  // area effects
+  h+='<div class="sec-h">エリアによる加算(円/時間)</div><div class="card">';
+  AREA.forEach(a=>{
+    const v=m.area[a]!=null?m.area[a]:0;
+    h+='<div class="coefrow"><div class="cr-label">'+esc(a)+'</div><button class="cr-sign" onclick="flipArea(\''+a.replace(/'/g,"\\'")+'\')" title="符号を反転">±</button><input class="cr-input" inputmode="numeric" value="'+v+'" oninput="setAreaCoef(\''+a.replace(/'/g,"\\'")+'\',this.value)"><span class="cr-unit">円</span></div>';
+  });
+  h+='</div>';
+
+  // range width (sigma)
+  h+='<div class="sec-h">レンジの幅(不確実性)</div><div class="card">'
+   +'<div class="coefrow"><div class="cr-label">残差の標準偏差<small>レンジの半値幅の基準。小さいほど狭いレンジ</small></div><input class="cr-input" inputmode="numeric" value="'+m.sigma+'" oninput="setSigma(this.value)"><span class="cr-unit">円</span></div></div>';
+
+  // calibration status per business
+  h+='<div class="sec-h">較正の状況(業態別)</div><div class="card"><table class="tt">';
+  BIZ.forEach(b=>{
+    const n=allRecords().filter(r=>r.biz===b&&r.rate>0).length;
+    const cal=m.calib[b];
+    const status=cal?('較正済 N='+cal.n+' ('+cal.updatedAt+')'):(n>=CALIB_MIN_N?'較正可能':'データ '+n+'/'+CALIB_MIN_N+'件');
+    h+='<tr><td>'+esc(b)+'</td><td>'+esc(status)+'</td><td style="text-align:right">'+(n>=CALIB_MIN_N?'<button class="btn sm" onclick="manualCalib(\''+b+'\')">今すぐ較正</button>':'<span class="muted" style="font-size:.76rem">データ不足</span>')+'</td></tr>';
+  });
+  h+='</table></div>';
+
+  const anyLocked=m.locked&&Object.keys(m.locked).length>0;
+  h+='<div class="toolbar"><button class="btn ghost" onclick="resetCoefs()">仮の初期値に戻す</button>'
+   +(anyLocked?'<button class="btn ghost" onclick="unlockAll()">編集ロックを解除(自動較正に戻す)</button>':'')+'</div>'
+   +'<div class="note">手で編集した係数には「編集済」が付き、その項目は自動較正で上書きされません(あなたの調整が優先されます)。自動較正に戻したいときは「編集ロックを解除」を押してください。</div>'
+   +'<div class="note">なぜ単純な加算式か：限られたデータに複雑なモデルを当てると見せかけの精度が出るだけで、かえって実態から外れます(過剰適合)。誰でも中身を追えて、自分で直せる単純さを選んでいます。</div>';
+  return h;
+}
+function num(v){
+  const s=String(v).replace(/[,，]/g,"").trim();
+  if(s===""||s==="-")return null; // allow transient '-' while typing without resetting
+  const n=parseFloat(s);
+  return isNaN(n)?null:n;
+}
+function lockKey(k){const m=ensureModel();if(!m.locked)m.locked={};m.locked[k]=true;}
+function setDriverCoef(id,v){const n=num(v);if(n!=null){ensureModel().drivers[id]=n;lockKey("driver:"+id);persist();}}
+function setBaseRate(b,v){const n=num(v);if(n!=null&&n>0){ensureModel().baseOverride[b]=n;persist();}} // no re-render while typing (focus)
+function resetBaseRate(b){const m=ensureModel();delete m.baseOverride[b];commit();}
+function setTierCoef(t,v){const n=num(v);if(n!=null){ensureModel().tier[t]=n;lockKey("tier:"+t);persist();}}
+function setAreaCoef(a,v){const n=num(v);if(n!=null){ensureModel().area[a]=n;lockKey("area:"+a);persist();}}
+function setSigma(v){const n=num(v);if(n!=null&&n>0){ensureModel().sigma=n;lockKey("sigma");persist();}}
+function flipDriver(id){const m=ensureModel();m.drivers[id]=-(m.drivers[id]||0);lockKey("driver:"+id);commit();}
+function flipTier(t){const m=ensureModel();m.tier[t]=-(m.tier[t]||0);lockKey("tier:"+t);commit();}
+function flipArea(a){const m=ensureModel();m.area[a]=-(m.area[a]||0);lockKey("area:"+a);commit();}
+function manualCalib(biz){
+  const r=calibrateBusiness(biz);
+  if(r.ok){commit();alert(biz+" を実データ "+r.n+" 件で較正しました。");}
+  else alert("較正にはあと"+(r.need-r.n)+"件必要です。");
+}
+function resetCoefs(){
+  if(!confirm("係数を仮の初期値に戻しますか？手動調整と較正結果は失われます。"))return;
+  state.coefs=defaultCoefs();commit();
+}
+function unlockAll(){
+  if(!confirm("手動編集のロックを解除します。以降、実データが集まると係数が自動で見直されます。今の数値はそのまま残ります。"))return;
+  ensureModel().locked={};commit();
+}
+
+/* ============================================================
+   DISTRIBUTION DESIGNER — interactive bimodal generator.
+   PEAKS drive the shape (gaussian mixture). Quantiles are shown
+   as a reference overlay (peak-priority per design decision).
+   ============================================================ */
+function defaultDesign(){
+  return {
+    peaks:[{center:20000,spread:6000,weight:1.0}],   // 1–2 peaks (mode-priority)
+    reportPcts:[0.10,0.25,0.50,0.75,0.90],            // percentiles to COMPUTE & show (top-k% reading)
+    n:1000,
+    correlate:true   // keep higher-attribute => higher-rate coupling
+  };
+}
+function ensureDesign(){ if(!state.design)state.design=defaultDesign(); 
+  if(!state.design.peaks||!state.design.peaks.length)state.design.peaks=[{center:20000,spread:6000,weight:1}];
+  if(!state.design.reportPcts)state.design.reportPcts=[0.10,0.25,0.50,0.75,0.90];
+  return state.design; }
+
+/* compute the value at a given TOP-k% percentile from the mixture density,
+   by numerically integrating the density over the bin grid (CDF inversion). */
+function mixtureQuantiles(d,pcts){
+  // build PDF over a fine grid, normalize to CDF
+  const step=500, hi=BIN_MAX+10000;
+  const xs=[], pdf=[];
+  for(let x=0;x<=hi;x+=step){ xs.push(x); pdf.push(mixtureDensity(d,x)); }
+  const tot=pdf.reduce((s,v)=>s+v,0)||1;
+  const cdf=[]; let c=0;
+  for(let i=0;i<pdf.length;i++){ c+=pdf[i]/tot; cdf.push(c); }
+  // "top k%" => ascending percentile (1-k). value where cdf reaches that.
+  return pcts.map(k=>{
+    const target=1-k;                  // top-10% => ascending p=0.90
+    let xi=xs.length-1;
+    for(let i=0;i<cdf.length;i++){ if(cdf[i]>=target){ xi=i; break; } }
+    return { p:k, v:Math.round(xs[xi]/BIN)*BIN };
+  });
+}
+
+/* sample one rate from the gaussian mixture defined by peaks */
+function sampleMixture(d,rng){
+  const peaks=d.peaks;
+  const tot=peaks.reduce((s,p)=>s+Math.max(0.0001,p.weight),0);
+  let x=rng()*tot, k=0;
+  for(let i=0;i<peaks.length;i++){ x-=Math.max(0.0001,peaks[i].weight); if(x<=0){k=i;break;} k=i; }
+  const pk=peaks[k];
+  const val=pk.center + gauss(rng)*Math.max(500,pk.spread);
+  return val;
+}
+/* analytic-ish density of the mixture at value v (for drawing the curve) */
+function mixtureDensity(d,v){
+  let dens=0;
+  d.peaks.forEach(p=>{
+    const s=Math.max(500,p.spread), w=Math.max(0.0001,p.weight);
+    dens += w*Math.exp(-0.5*Math.pow((v-p.center)/s,2))/(s*Math.sqrt(2*Math.PI));
+  });
+  return dens;
+}
+
+/* generate demo records from the DESIGN (peaks). Correlation via rank-coupling:
+   draw mixture samples, then assign the LARGEST sampled values to the highest
+   attribute signals so higher attrs => higher pay, preserving the mixture shape. */
+function genDemoFromDesign(d,seed){
+  const n=d.n, rng=mulberry32(seed||(2000+n));
+  // attribute stubs
+  const stub=[];
+  for(let i=0;i<n;i++){
+    const biz=pick(rng,BIZ), area=pick(rng,AREA), tier=pick(rng,TIER);
+    const dr={}; BDRIVERS.forEach(x=>{ if(rng()>0.15) dr[x.id]=Math.floor(rng()*x.opts.length); });
+    stub.push({biz,area,tier,dr});
+  }
+  // mixture samples (the SHAPE)
+  let samples=stub.map(()=>Math.max(2000,sampleMixture(d,rng)));
+  if(d.correlate){
+    // rank-couple: sort samples desc, assign to records sorted by attr signal desc
+    const sortedVals=samples.slice().sort((a,b)=>b-a);
+    const sig=stub.map((s,i)=>[0.6*attrScore(s.biz,s.area,s.tier,s.dr)+0.4*rng(),i])
+                  .sort((a,b)=>b[0]-a[0]); // highest signal first
+    const assigned=new Array(n);
+    sig.forEach(([_,idx],rank)=>{ assigned[idx]=sortedVals[rank]; });
+    samples=assigned;
+  }
+  return stub.map((s,i)=>{
+    const rate=Math.max(2000,Math.round(samples[i]/BIN)*BIN);
+    return {biz:s.biz,area:s.area,tier:s.tier,bin:binIndex(rate),rate,binLabel:binLabel(binIndex(rate)),
+      drivers:s.dr,ts:"2026-0"+(1+Math.floor(rng()*6)),key:"demo"+i,demo:true};
+  });
+}
+function applyDesign(){
+  const d=ensureDesign();
+  ensureBench();
+  state.bench.pool=state.bench.pool.filter(r=>!r.demo);
+  state.bench.pool.push(...genDemoFromDesign(d, 2000+d.n));
+  state.demoN=d.n;
+  autoCalibrate();
+  commit();
+}
+
+/* ---------- VIEW ---------- */
+function vDesign(){
+  const d=ensureDesign();
+  let h=modeBanner()
+   +'<div class="eyebrow">Module 04</div><h1>分布デザイナー(検証用)</h1>'
+   +'<p class="sub">ピーク(山)を置いて分布の形を作ります。ピークが形を決め、分位点は参考の目安として重ねて表示します。「この設定で生成」を押すとダミーデータに反映されます。架空データであり実在の相場ではありません。</p>';
+
+  // live preview chart
+  h+='<div class="sec-h">プレビュー</div><div id="designPreviewBox">'+designPreview(d)+'</div>';
+
+  // peaks (1-2)
+  h+='<div class="sec-h">ピーク(山)・最大2つ</div><div class="card">';
+  d.peaks.forEach((p,i)=>{
+    h+='<div style="border-bottom:1px solid var(--line2);padding-bottom:12px;margin-bottom:12px">'
+     +'<div class="row" style="justify-content:space-between"><b style="font-size:.86rem">ピーク '+(i+1)+'</b>'
+     +(d.peaks.length>1?'<button class="btn danger sm" onclick="delPeak('+i+')">削除</button>':'')+'</div>'
+     +sliderRow('中心 (円/時)', 'pk_c_'+i, 2500, 80000, 2500, p.center, "setPeak("+i+",'center',this.value)")
+     +sliderRow('広がり (円)', 'pk_s_'+i, 1000, 25000, 500, p.spread, "setPeak("+i+",'spread',this.value)")
+     +sliderRow('高さ(相対)', 'pk_w_'+i, 1, 100, 1, Math.round(p.weight*100), "setPeak("+i+",'weight',this.value)")
+     +'</div>';
+  });
+  if(d.peaks.length<2)h+='<button class="btn ghost sm" onclick="addPeak()">＋ ピークを追加(bimodal)</button>';
+  h+='</div>';
+
+  // computed quantiles (result, not input)
+  h+='<div class="sec-h">この形から計算される分位値(結果)</div><div id="designQBox">'+designQTable(d)+'</div>';
+
+  // sample size + correlate + apply
+  h+='<div class="card">'
+   +sliderRow('生成件数 N', 'd_n', 25, 2000, 25, d.n, "setDesignN(this.value)")
+   +'<label style="display:flex;align-items:center;gap:8px;font-size:.84rem;margin:8px 0"><input type="checkbox" '+(d.correlate?"checked":"")+' onchange="toggleCorrelate(this.checked)" style="width:auto"> 高属性ほど高単価の相関を付ける</label>'
+   +'<div class="toolbar" style="margin-bottom:0"><button class="btn amber" onclick="applyDesign()">この設定でダミー生成</button><button class="btn ghost" onclick="resetDesign()">初期設定に戻す</button></div></div>';
+  return h;
+}
+function sliderRow(label,id,min,max,step,val,handler){
+  return '<div class="fld" style="margin-bottom:10px"><label style="font-weight:500">'+esc(label)+': <span id="lbl_'+id+'" style="font-family:var(--mono)">'+fmtSlider(id,val)+'</span></label>'
+   +'<input type="range" min="'+min+'" max="'+max+'" step="'+step+'" value="'+val+'" oninput="'+handler+'" style="width:100%">'
+   +'</div>';
+}
+function fmtSlider(id,val){
+  if(id.indexOf('pk_w_')===0)return val+'%';
+  if(id==='d_n')return String(val);
+  return '¥'+Number(val).toLocaleString();
+}
+function designPreview(d){
+  // histogram of expected density across bins + quantile reference lines
+  const dens=[];
+  for(let i=0;i<NBIN;i++){ dens.push(mixtureDensity(d, i*BIN+BIN/2)); }
+  const max=Math.max(...dens,1e-9);
+  let h='<div class="card"><div style="display:flex;align-items:flex-end;gap:2px;height:130px;padding-top:10px;position:relative">';
+  // computed quantile markers (top-k% => value): place caret at the bin
+  const qmarks=mixtureQuantiles(d,d.reportPcts).map(q=>({bin:binIndex(q.v),p:q.p}));
+  for(let i=0;i<NBIN;i++){
+    const hgt=Math.max(dens[i]/max*116,2);
+    const qhere=qmarks.find(m=>m.bin===i);
+    h+='<div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;position:relative" title="'+binLabel(i)+'">'
+     +(qhere?'<div style="position:absolute;top:-12px;font-size:.6rem;color:var(--sage)">▽'+Math.round(qhere.p*100)+'</div>':'')
+     +'<div style="width:100%;height:'+hgt+'px;background:var(--amber2);border-radius:2px 2px 0 0;opacity:.95"></div></div>';
+  }
+  h+='</div>'+axisTicks()
+   +'<p class="muted" style="margin-top:8px">山＝ピーク指定の密度。▽は分布から計算した分位値(上位%)の位置。</p></div>';
+  return h;
+}
+/* ---- handlers ---- */
+function setPeak(i,k,v){const d=ensureDesign();const n=parseFloat(v);if(isNaN(n))return;
+  if(k==='weight')d.peaks[i].weight=Math.max(0.01,n/100); else d.peaks[i][k]=n;
+  persist(); refreshDesign();}
+function addPeak(){const d=ensureDesign();if(d.peaks.length<2){d.peaks.push({center:45000,spread:8000,weight:0.5});commit();}}
+function delPeak(i){const d=ensureDesign();d.peaks.splice(i,1);if(!d.peaks.length)d.peaks=[{center:20000,spread:6000,weight:1}];commit();}
+function setDesignN(v){const d=ensureDesign();d.n=parseInt(v)||1000;persist();setLbl("d_n",String(d.n));}
+function toggleCorrelate(b){ensureDesign().correlate=b;commit();}
+function resetDesign(){if(!confirm("分布デザイナーを初期設定に戻しますか？"))return;state.design=defaultDesign();commit();}
+function designQTable(d){
+  const qs=mixtureQuantiles(d,d.reportPcts);
+  return '<div class="card"><p class="muted" style="margin-bottom:10px">ピークで作った分布から計算した「上位X%の値」です。指定するものではなく、形の結果として出ます。</p>'
+   +'<table class="tt">'+qs.map(q=>'<tr><td>上位 '+Math.round(q.p*100)+'%</td><td style="font-family:var(--mono);text-align:right">'+yen(q.v)+' / 時</td></tr>').join("")+'</table></div>';
+}
+function refreshDesign(){
+  const d=ensureDesign();
+  const pv=document.getElementById("designPreviewBox");
+  if(pv)pv.innerHTML=designPreview(d);
+  const qb=document.getElementById("designQBox");
+  if(qb)qb.innerHTML=designQTable(d);
+  d.peaks.forEach((p,i)=>{
+    setLbl("pk_c_"+i,'¥'+Number(p.center).toLocaleString());
+    setLbl("pk_s_"+i,'¥'+Number(p.spread).toLocaleString());
+    setLbl("pk_w_"+i,Math.round(p.weight*100)+'%');
+  });
+}
+function setLbl(id,txt){const el=document.getElementById('lbl_'+id);if(el)el.textContent=txt;}
+
+/* ============ init (last, after all consts) ============ */
+render();
+/* first-run safety intro: shows until confirmed. If storage is off the flag
+   doesn't persist, so a fresh session shows it again — intended, since a
+   fresh (ephemeral) session is a fresh context needing the same reassurance. */
+function dismissIntro(){
+  state.settings.seenIntro=true;persist();
+  document.getElementById("introScreen").classList.remove("show");
+}
+if(!state.settings.seenIntro)document.getElementById("introScreen").classList.add("show");
+
+</script>
+</body>
+</html>
