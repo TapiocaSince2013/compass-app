@@ -645,9 +645,9 @@ function vAbout(){
    +'<li>右上の「そっと隠す」または <b>Escキー</b>で、画面を中立的な表示に切り替えられます。</li>'
    +'<li>持ち出し(コピー)は、個人を特定する情報を含まない形にしています。貼り付け先には十分ご注意ください。</li>'
    +'</ul></div>'
-   +(REPO_URL?('<div class="card"><b style="font-size:.92rem">確かめる・詳しく知る</b><p class="muted" style="margin-top:6px">上に書いたことは、口約束にしたくありません。ソースコード(このアプリの中身そのもの)と、作った人についての説明を、誰でも読める場所に置いています。</p><a class="btn ghost sm" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block" href="'+esc(REPO_URL)+'">ソースコードと詳しい説明を見る(GitHub)</a></div>'):"")
+   +'<div class="card"><b style="font-size:.92rem">確かめる・詳しく知る</b><p class="muted" style="margin-top:6px">上に書いたことは、口約束にしたくありません。詳しい説明と、作った人について読めるページがあります。</p><a class="btn ghost sm" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block" href="about.html">詳しい説明を見る</a>'+(REPO_URL?('<p class="muted" style="font-size:.74rem;margin-top:8px"><a target="_blank" rel="noopener" style="color:var(--ink3)" href="'+esc(REPO_URL)+'">ソースコードを見る(GitHub)</a> — 中身を確かめたい人向け</p>'):"")+'</div>' 
    +'<div class="card"><b style="font-size:.92rem">なぜ「送信ボタン」でなく、外部フォームなの?</b><p class="muted" style="margin-top:6px">このアプリ自身が送信機能を持ってしまうと、「送りません」という約束が嘘になり、コードを見ても確かめられなくなります。だから送信はあえてアプリの外に出し、<b>あなたの手</b>に委ねています。提供のときは、あなたのブラウザでGoogleフォームが開き、あなたが「送信」を押して初めて送られます。少し手間ですが、その手間は「アプリは送っていない」ことをあなた自身が確かめられることの裏返しです。</p></div>'
-   +'<div class="card"><b style="font-size:.92rem">数字の限界について</b><p class="muted" style="margin-top:6px">出てくる金額は「交渉の出発点となる目安」であって、あなたの価値の断定ではありません。元になる相場の数字自体に、本来あるべき公正さからのズレ（中間搾取など）が含まれていることがあります。だからこそ、数字を鵜呑みにせず、仕組みを知って、自分で調整できるようにしています(下の「推定のしくみ」)。</p></div>'
+   +'<div class="card"><b style="font-size:.92rem">数字の限界について</b><p class="muted" style="margin-top:6px">出てくる金額は「交渉の出発点となる目安」であって、あなたの価値の断定ではありません。元になる相場の数字自体に、本来あるべき公正さからのズレ（大きすぎる中間マージンなど）が含まれていることがあります。だからこそ、数字を鵜呑みにせず、仕組みを知って、自分で調整できるようにしています(下の「推定のしくみ」)。</p></div>'
    +aboutMechanismCard()
    +(HUB.feedbackUrl?('<div class="card"><b style="font-size:.92rem">感想・違和感を送る(匿名)</b><p class="muted" style="margin-top:6px">この道具への意見・違和感・「ここが現実と違う」の指摘を、名乗らずに送れます。あなたの一言が道具を直します。</p><a class="btn ghost sm" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block" href="'+esc(HUB.feedbackUrl)+'">匿名で送る(ブラウザで開きます)</a></div>'):"")
    +'<div class="sec-h">データの保存と持ち運び</div>'
