@@ -168,6 +168,7 @@ pre.out{background:var(--rail);color:#DBE3DD;border-radius:10px;padding:16px;fon
   .brand{font-size:.98rem}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@keyframes leafPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
 </style>
 </head>
 <body>
@@ -454,7 +455,13 @@ function vSplit(){
   return h;
 }
 function splitResultHTML(c,y){
-  if(c!=null&&c>0&&y!=null)return renderSplit(c,y);
+  // ガード: NaN(文字入力)・負値・ゼロ以下の支払いは描画しない。
+  // 手取り>支払いは計算せず、責めない言い方で入力の確認を促す
+  // (負の金額やNaNを表示すると、道具全体の信頼が一気に崩れるため)。
+  const cOK=c!=null&&!isNaN(c)&&c>0;
+  const yOK=y!=null&&!isNaN(y)&&y>=0;
+  if(cOK&&yOK&&y>c)return '<div class="empty">手取りが、お客さまの支払い額を上回っています。入力を確かめてみてください(手取り欄には、この支払いから受け取る分だけを入れます)。</div>';
+  if(cOK&&yOK)return renderSplit(c,y);
   return '<div class="empty">支払い額と手取りを入れると、取り分の割合と中間マージンが表示されます。</div>';
 }
 function agencyRows(){
@@ -466,7 +473,7 @@ function agencyRows(){
     +'<button class="btn danger sm" onclick="rmAgency('+i+')">×</button></div>').join("");
 }
 function renderSplit(cust,you){
-  const known=state.split.agencyFields.reduce((a,f)=>{const v=parseFloat(String(f.amount||"").replace(/[,，]/g,""));return a+(isNaN(v)?0:v);},0);
+  const known=state.split.agencyFields.reduce((a,f)=>{const v=parseFloat(String(f.amount||"").replace(/[,，]/g,""));return a+(isNaN(v)||v<0?0:v);},0); // 負の差引は無視(表示崩れ防止)
   const taken=cust-you;                    // total not reaching you
   const otherTaken=Math.max(0,taken-known);// unexplained middle
   const youPct=clamp(you/cust*100,0,100);
@@ -504,7 +511,7 @@ function renderSplit(cust,you){
 
   h+='<div class="toolbar"><button class="btn amber" onclick="openSplitExport('+cust+','+you+','+taken+','+known+','+otherTaken+')">この内訳を持ち出す(匿名)</button></div>';
   h+='<div id="splitExport"></div>';
-  h+='<p class="muted" style="font-size:.78rem;margin-top:10px">匿名提供が集まると、ここに「みんなの取り分の帯」が出る予定です。提供は「相場のなかの位置」の🌱から(取り分を含めるかは、あなたが選べます)。</p>';
+  h+='<p class="muted" style="font-size:.78rem;margin-top:10px">匿名提供が集まると、ここに「みんなの取り分の帯」が出る予定です。提供は「相場のなかの位置」の🌱「実際のところを、持ち寄る」から(取り分を含めるかは、あなたが選べます)。</p>';
   h+='</div>';
   return h;
 }
@@ -638,6 +645,8 @@ function vAbout(){
    +'<li>右上の「そっと隠す」または <b>Escキー</b>で、画面を中立的な表示に切り替えられます。</li>'
    +'<li>持ち出し(コピー)は、個人を特定する情報を含まない形にしています。貼り付け先には十分ご注意ください。</li>'
    +'</ul></div>'
+   +(REPO_URL?('<div class="card"><b style="font-size:.92rem">確かめる・詳しく知る</b><p class="muted" style="margin-top:6px">上に書いたことは、口約束にしたくありません。ソースコード(このアプリの中身そのもの)と、作った人についての説明を、誰でも読める場所に置いています。</p><a class="btn ghost sm" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block" href="'+esc(REPO_URL)+'">ソースコードと詳しい説明を見る(GitHub)</a></div>'):"")
+   +'<div class="card"><b style="font-size:.92rem">なぜ「送信ボタン」でなく、外部フォームなの?</b><p class="muted" style="margin-top:6px">このアプリ自身が送信機能を持ってしまうと、「送りません」という約束が嘘になり、コードを見ても確かめられなくなります。だから送信はあえてアプリの外に出し、<b>あなたの手</b>に委ねています。提供のときは、あなたのブラウザでGoogleフォームが開き、あなたが「送信」を押して初めて送られます。少し手間ですが、その手間は「アプリは送っていない」ことをあなた自身が確かめられることの裏返しです。</p></div>'
    +'<div class="card"><b style="font-size:.92rem">数字の限界について</b><p class="muted" style="margin-top:6px">出てくる金額は「交渉の出発点となる目安」であって、あなたの価値の断定ではありません。元になる相場の数字自体に、本来あるべき公正さからのズレ（中間搾取など）が含まれていることがあります。だからこそ、数字を鵜呑みにせず、仕組みを知って、自分で調整できるようにしています(下の「推定のしくみ」)。</p></div>'
    +aboutMechanismCard()
    +(HUB.feedbackUrl?('<div class="card"><b style="font-size:.92rem">感想・違和感を送る(匿名)</b><p class="muted" style="margin-top:6px">この道具への意見・違和感・「ここが現実と違う」の指摘を、名乗らずに送れます。あなたの一言が道具を直します。</p><a class="btn ghost sm" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block" href="'+esc(HUB.feedbackUrl)+'">匿名で送る(ブラウザで開きます)</a></div>'):"")
@@ -758,11 +767,14 @@ const PRIOR_WEIGHT=6;   // 事前の疑似カウント総量(弱め)。実デー
 const HUB={
   submitFormUrl:"https://docs.google.com/forms/d/e/1FAIpQLSeLhCzp9bTvtINK2o5cEJl_JZsBOgh8bcsK3CD_7I1GNk4Tgw/viewform",
   submitEntryId:"entry.68450378",
-  feedbackUrl:"https://docs.google.com/forms/d/e/1FAIpQLSeLhCzp9bTvtINK2o5cEJl_JZsBOgh8bcsK3CD_7I1GNk4Tgw/viewform"   // 感想は同フォームの「ひとこと」欄で受ける
+  feedbackUrl:"https://docs.google.com/forms/d/e/1FAIpQLSeLhCzp9bTvtINK2o5cEJl_JZsBOgh8bcsK3CD_7I1GNk4Tgw/viewform"
 };
 /* 検証済みの提供レコード(設置者が確認して取り込んだ実データ)。次版の配布で全員のNが育つ。
    形式: {biz,rate(ビン下端の代表値),area,tier,drivers,ts,share(任意・5%帯の下端)} */
 const HUB_POOL=[];
+/* このアプリのソースコード置き場(GitHubリポジトリ)。「送信ゼロを自分で確かめられる」
+   検証可能な透明性の入口。Aboutに導線として表示する。空なら非表示。 */
+const REPO_URL="https://github.com/tapiocasince2013/compass-app";
 function rawPriorCenterRate(biz){
   // コース料金÷時間 を時給換算した粗い中心値。出典: 風俗求人系サイトの公開相場(信頼度=低)
   // 基準: 一般デリヘル 60分20,000円 × バック率50% = 10,000円/時 を中心に、業態で調整
@@ -902,7 +914,7 @@ function vBench(){
    +'<span style="color:var(--ink2);font-size:1rem;transform:rotate('+(ui.detailsOpen?"90":"0")+'deg);transition:.15s">›</span></button>';
   if(ui.detailsOpen){
     h+='<div style="padding:0 18px 16px 18px">'
-     +'<div class="muted" style="margin-bottom:10px;font-size:.8rem">これらは分布の絞り込みには使わず、提供データの説明変数として記録されます(将来、何が単価に効くかの分析に使われます)。書きたくない項目は空欄でかまいません。</div>';
+     +'<div class="muted" style="margin-bottom:10px;font-size:.8rem">これらは分布の絞り込みには使わず、提供するときに一緒に含められる項目です(将来、何が単価に効くかの分析に使われます)。書きたくない項目は空欄でかまいません。</div>';
     h+='<div class="fld" style="margin-bottom:12px"><label style="font-weight:500">店格</label><div class="seg">'
      +TIER.map(t=>'<button class="'+(f.tier===t?"on":"")+'" onclick="setBenchTier(\''+t+'\')">'+esc(t)+'</button>').join("")
      +'</div></div>';
@@ -944,7 +956,7 @@ function bandCard(dist,myRate,pred){
   const pct=myRate!=null?positionPercentile(c,myRate):null;
   if(myRate!=null){
     const top=Math.max(1,Math.round(100-pct));
-    h+='<div class="row" style="justify-content:space-between;align-items:center"><div class="eyebrow">あなたの単価</div>'+pill+'</div>'
+    h+='<div class="row" style="justify-content:space-between;align-items:center"><div class="eyebrow">あなたのいまの単価</div>'+pill+'</div>'
      +'<b style="font-family:var(--serif);font-size:2.1rem;display:block;line-height:1.15;margin-top:2px">'+yen(myRate)+'<small style="font-size:.85rem;color:var(--ink2);font-family:var(--sans)"> / 時間</small></b>'
      +'<p style="font-size:.96rem;margin:4px 0 18px">吉原のソープではたらく人の、およそ<b>上位'+top+'%</b>にいます。</p>';
   }else{
@@ -1136,17 +1148,27 @@ function kAnonymityCount(f){
 function giveSection(f,myRate,dist){
   const mine=ensureBench().mine;
   if(!ui.giveOpen){
-    const status=mine?'✓ 提供済み(開くと更新できます)':('いまの実データ N='+dist.n+' — あなたの1件が、目安を実態に近づけます');
-    return '<div class="card" style="padding:0;overflow:hidden"><button onclick="toggleGive()" style="width:100%;text-align:left;background:transparent;border:none;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px">'
-     +'<span><b style="font-size:.92rem">🌱 この帯を育てる(匿名で提供・任意)</b><br><span class="muted" style="font-size:.8rem">'+status+'</span></span>'
-     +'<span style="color:var(--ink2);font-size:1rem">›</span></button></div>';
+    const sentOk=mine&&ensureBench().sentKey===recKey(mine);
+    const status=mine?(sentOk?'✓ 提供・送信済み(開くと更新できます)':'グラフに反映済み — 送信がまだです(開いて送れます)')
+      :('いまの実データ N='+dist.n+' — あなたの1件が、目安を実態に近づけます');
+    const done=!!mine;
+    // 未提供のときだけ、そっと浮かせる(新芽色の淡い地+左アクセント+微アニメの芽)。
+    // 提供済みは煽らず控えめのまま(任意性の尊重: 再供出を促さない)。
+    const cardStyle=done
+      ? 'padding:0;overflow:hidden'
+      : 'padding:0;overflow:hidden;background:var(--sage2);border-color:var(--sage);box-shadow:0 1px 0 var(--sage) inset,3px 0 0 var(--teal) inset';
+    const leafStyle=done?'' : 'display:inline-block;animation:leafPulse 2.4s ease-in-out infinite';
+    const chevCol=done?'var(--ink3)':'var(--teal)';
+    return '<div class="card" style="'+cardStyle+'"><button onclick="toggleGive()" style="width:100%;text-align:left;background:transparent;border:none;padding:15px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px">'
+     +'<span><b style="font-size:.96rem'+(done?'':';color:var(--teal-d,#2b5e50)')+'"><span style="'+leafStyle+'">🌱</span> 実際のところを、持ち寄る<span class="muted" style="font-weight:400;font-size:.8rem">（匿名・任意）</span></b><br><span class="muted" style="font-size:.8rem">'+status+'</span></span>'
+     +'<span style="color:'+chevCol+';font-size:1.15rem">›</span></button></div>';
   }
   return giveToGet(f,myRate,dist)
    +'<div class="toolbar" style="margin-top:8px"><button class="btn ghost sm" onclick="toggleGive()">閉じる</button></div>';
 }
 function toggleGive(){ui.giveOpen=!ui.giveOpen;refreshBenchResult();}
 function giveToGet(f,myRate,dist){
-  let h='<div class="sec-h">この分布を育てる(任意の匿名提供)</div>';
+  let h='<div class="sec-h">実際のところを、持ち寄る(匿名・任意)</div>';
   if(myRate==null){
     return h+'<div class="empty">先にあなたの売上単価を入力すると、匿名提供の準備ができます。</div>';
   }
@@ -1158,10 +1180,24 @@ function giveToGet(f,myRate,dist){
   // POST-CONTRIBUTION panel: the moment right after 提供. Show what changed on
   // this screen (the payoff = motivation), then the single send action. This
   // replaces the old two-step "提供→別ボタンで送る" that felt like doing it twice.
+  // 帰還確認: フォームから戻ってきた人に「送信」を押せたか自己申告してもらう。
+  // アプリは送信完了を観測できないため、送信済みフラグは申告時のみ立てる
+  // (タップ時に立てると、フォームで離脱した人が再送できなくなる)。
+  if(ui.awaitReturn && already){
+    h+='<div class="card" style="border-color:var(--teal)">'
+     +'<div class="eyebrow" style="color:var(--teal)">✓ グラフに反映しました(N='+dist.n+')</div>'
+     +'<b style="font-size:1.02rem;display:block;margin:6px 0 10px">開いた画面で「送信」は押せましたか?</b>'
+     +'<div class="row" style="gap:8px;flex-wrap:wrap">'
+     +'<button class="btn amber" onclick="confirmSent()">✓ 送信しました</button>'
+     +'<button class="btn ghost" onclick="returnNotSent()">まだ・送れなかった</button></div>'
+     +'<p class="muted" style="font-size:.76rem;margin-top:10px">アプリは送信を確認できないため、あなたの「送信しました」のタップだけを目印にしています。送れなかった場合は、もう一度送信画面をひらけます。</p>'
+     +'</div>';
+    return h;
+  }
   if(ui.justContributed && already){
     const url=submitUrl(rec);
     h+='<div class="card" style="border-color:var(--teal)">'
-     +'<div class="eyebrow" style="color:var(--teal)">✓ この端末に反映しました</div>'
+     +'<div class="eyebrow" style="color:var(--teal)">✓ グラフに反映しました</div>'
      +'<b style="font-size:1.05rem;display:block;margin:4px 0 8px">あなたの1件で、この帯が動きました</b>'
      +'<ul class="pts" style="font-size:.86rem">'
      +'<li>この条件の実データ: <b>N='+dist.n+'</b> になりました</li>'
@@ -1174,9 +1210,9 @@ function giveToGet(f,myRate,dist){
     h+='<div class="card">'
      +'<p class="muted" style="font-size:.8rem;margin-bottom:8px">みんなの分布に反映するには、最後にひとつ——匿名の集約先に送ります(任意)。</p>'
      +'<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:12px">'
-     +'<p class="muted" style="font-size:.8rem;margin-bottom:8px">アプリは送信しません。下をタップすると、丸めた内容が<b>あなたのブラウザ</b>で匿名フォームに運ばれます(名前・メール不要)。届いた内容は作成者が確認し、およそ1週間以内に次の版へ反映され、この帯の「実データN」が増えます。</p>'
+     +'<p class="muted" style="font-size:.8rem;margin-bottom:8px">アプリは送信しません。下をタップすると、丸めた内容が<b>あなたのブラウザ</b>で匿名フォームに運ばれます(名前・メール不要)。送った内容は、みんなの分布に合流して「実データN」を増やします。</p>'
      +'<div class="row" style="gap:8px;flex-wrap:wrap">';
-    if(url)h+='<a class="btn amber sm" target="_blank" rel="noopener" style="text-decoration:none" onclick="markSent()" href="'+esc(url)+'">匿名フォームで送って完了</a>';
+    if(url)h+='<a class="btn amber sm" target="_blank" rel="noopener" style="text-decoration:none" onclick="jcGo()" href="'+esc(url)+'">送信画面をひらく</a>';
     h+='<button id="recCopyBtn" class="btn ghost sm" onclick="copyRecord()">内容をコピー(他の窓口用)</button>'
      +'<button class="btn ghost sm" onclick="dismissContributed()">'+(url?'あとで送る':'閉じる')+'</button></div>';
     if(!url)h+='<p class="muted" style="font-size:.76rem;margin-top:6px">匿名フォームは準備中です。コピーして、信頼できる窓口(支援団体・匿名メッセージ等)に貼って送れます。</p>';
@@ -1185,7 +1221,7 @@ function giveToGet(f,myRate,dist){
   }
 
   h+='<div class="card">'
-   +'<p style="font-size:.9rem">あなたの情報を<b>2,500円のレンジに丸めた匿名データ</b>として提供すると、同じ条件の分布が育ちます。提供は任意で、出すのは下のプレビュー内容だけ。<b>正確な金額や個票は端末に残り、送信されません。</b></p>';
+   +'<p style="font-size:.9rem">あなたの情報を<b>2,500円のレンジに丸めた匿名データ</b>として提供すると、同じ条件の分布が育ちます。提供は任意で、出すのは下のプレビュー内容だけ。<b>正確な金額や個票は送信されません。</b></p>';
 
   // optional share opt-in (default OFF; only when the split module has data)
   if(shareRate()!=null){
@@ -1220,25 +1256,52 @@ function giveToGet(f,myRate,dist){
   // k-anonymity gate — but never a hard deadlock: early contributors can opt in with informed consent.
   if(k < 4){
     h+='<div class="banner amber">この条件で提供済みの人はまだ<b>'+k+'人</b>です。最初の数人は「自分が含まれている」と推測される可能性がやや高くなります。それを理解した上で、最初の一人として分布を立ち上げることもできます（出すのは丸めたレンジのみ・正確な金額は出ません）。</div>'
-     +'<div class="row"><button class="btn amber" onclick="contributeEarly()">'+(already?"記録を更新する":"この端末に記録する")+'</button>'
-     +'<button class="btn ghost" onclick="exportRecord()">提供せず、レコードを書き出すだけ</button></div>';
+     +primaryGiveButton(rec,already,true);
   }else{
     h+='<div class="banner sage">この条件には既に'+k+'人の提供があり、あなたのデータは十分に埋もれます(匿名性が保たれます)。</div>'
-     +'<div class="row"><button class="btn amber" onclick="contribute()">'+(already?"記録を更新する":"この端末に記録する")+'</button>'
-     +'<button class="btn ghost" onclick="exportRecord()">提供せず、レコードを書き出すだけ</button></div>';
+     +primaryGiveButton(rec,already,false);
   }
   if(already){
-    h+='<p class="muted" style="margin-top:8px">提供済み: 同じ条件・同じレンジで登録されています。条件を変えて再提供すると上書きされます(同一端末は1件)。</p>';
+    h+='<p class="muted" style="margin-top:8px">この条件・このレンジで提供済みです(内容を変えると更新できます)。</p>';
     h+=sendSection(rec);   // lets an already-contributed user re-open the send door
   }
   h+='</div>';
 
   // manual-merge note (no central server)
-  h+='<div class="note">このα版には集約サーバーがありません。提供データはこの端末に残り、送るかどうか・どの窓口に送るかは、あなたがその都度選びます。</div>';
+  h+='<div class="note">このα版には集約サーバーがありません。送るかどうか・どの窓口に送るかは、あなたがその都度選びます。</div>';
   return h;
 }
 /* 「送る」扉 — アプリは送信しない。本人のブラウザでフォームが開くだけ。
    フォーム未設定(HUB空)のときはコピーのみ表示。 */
+/* 一段化した提供ボタン: 「匿名で提供する」1タップで、端末への反映(実装詳細)と
+   送信画面(フォーム)の起動が同時に起こる。直前に遷移の予告を必ず添える。
+   フォーム未設定時のみ、従来のローカル反映+コピー動線に落ちる。 */
+function primaryGiveButton(rec,already,early){
+  const url=submitUrl(rec);
+  let h='';
+  if(url&&!already){
+    h+='<p class="muted" style="font-size:.8rem;margin:10px 0 8px"><b style="color:var(--ink)">このアプリは送りません。送るのは、あなた自身です。</b>だから最後は、あなたのブラウザで<b>送信画面(Googleフォーム)</b>が開きます。内容は入った状態なので、確かめて<b>「送信」を押すだけ</b>。あなたの手で送られます。</p>';
+    const label=early?'理解した上で、匿名で提供する':(ensureBench().mine?'提供を更新して送る':'匿名で提供する');
+    h+='<div class="row"><a class="btn amber" style="text-decoration:none" target="_blank" rel="noopener" href="'+esc(url)+'" onclick="provideAndGo()">'+label+'</a>'
+     +'<button class="btn ghost" onclick="exportRecord()">提供せず、書き出すだけ</button></div>';
+  }else if(!url&&!already){
+    const label=early?'理解した上で、匿名で提供する':'匿名で提供する';
+    h+='<div class="row"><button class="btn amber" onclick="contribute()">'+label+'</button>'
+     +'<button class="btn ghost" onclick="exportRecord()">提供せず、書き出すだけ</button></div>';
+  }
+  return h;
+}
+function provideAndGo(){
+  const f=ui.bench;const rate=computeRate(f);if(rate==null)return true;
+  const b=ensureBench();
+  b.mine=buildRecord(f,rate);
+  autoCalibrate();
+  ui.justContributed=false;
+  ui.awaitReturn=true;   // 帰還確認へ(送信済みはタップでなく本人の申告で立てる)
+  commit(false);
+  setTimeout(refreshBenchResult,400); // 新しいタブが開いてから画面を切り替える
+  return true;
+}
 function submitUrl(rec){
   if(!HUB.submitFormUrl||!HUB.submitEntryId)return null;
   // 送るのは実測(丸めたビン+属性)だけ。含めないもの: rate(正確な金額)、
@@ -1247,7 +1310,7 @@ function submitUrl(rec){
   return HUB.submitFormUrl+(HUB.submitFormUrl.includes("?")?"&":"?")+"usp=pp_url&"+HUB.submitEntryId+"="+encodeURIComponent(payload);
 }
 function recKey(rec){return rec.biz+"|"+rec.bin+"|"+(rec.share!=null?rec.share:"");}
-function markFormSent(rec){if(!rec)return;ensureBench().sentKey=recKey(rec);persist();setTimeout(refreshBenchResult,400);}
+function goFormAgain(){ui.awaitReturn=true;setTimeout(refreshBenchResult,400);return true;}
 function sendSection(rec){
   const url=submitUrl(rec);
   const sent=ensureBench().sentKey===recKey(rec);
@@ -1257,13 +1320,13 @@ function sendSection(rec){
     // same-content resend is suppressed on this device. Updating the record
     // (different bin) legitimately re-enables sending.
     h+='<p style="font-size:.86rem">✓ この内容は<b>送信済み</b>です。同じ内容を重ねて送る必要はありません。</p>'
-     +'<p class="muted" style="font-size:.76rem;margin-top:6px">単価や条件が変わって提供を更新したときは、また送れるようになります。(アプリはフォームの送信完了までは確認できないため、「送る」をタップした時点で送信済みの扱いにしています)</p>';
+     +'<p class="muted" style="font-size:.76rem;margin-top:6px">単価や条件が変わって提供を更新したときは、また送れるようになります。(送信の完了は、あなたの「送信しました」のタップで判断しています)</p>';
     h+='</div>';
     return h;
   }
-  h+='<p class="muted" style="font-size:.8rem;margin-bottom:8px">アプリは送信しません。下をタップすると、上のプレビューと同じ内容が<b>あなたのブラウザ</b>で匿名窓口に運ばれます。名前もメールアドレスも要りません。送るのは一度だけで大丈夫。</p>'
+  h+='<p class="muted" style="font-size:.8rem;margin-bottom:8px">送信がまだのようです。押すと<b>送信画面(Googleフォーム)</b>が開きます。内容は入った状態なので、確認して<b>「送信」を押すだけ</b>。名前もメールアドレスも要りません。</p>'
    +'<div class="row" style="gap:8px;flex-wrap:wrap">';
-  if(url)h+='<a class="btn amber sm" target="_blank" rel="noopener" style="text-decoration:none" href="'+esc(url)+'" onclick="markFormSent(curSendRec())">匿名フォームで送る</a>';
+  if(url)h+='<a class="btn amber sm" target="_blank" rel="noopener" style="text-decoration:none" href="'+esc(url)+'" onclick="goFormAgain()">送信画面をひらく</a>';
   h+='<button id="recCopyBtn" class="btn ghost sm" onclick="copyRecord()">内容をコピー(他の窓口用)</button></div>';
   if(!url)h+='<p class="muted" style="font-size:.76rem;margin-top:6px">匿名フォームは準備中です。コピーして、信頼できる窓口(支援団体・匿名メッセージ等)に貼って送れます。</p>';
   h+='</div>';
@@ -1341,6 +1404,7 @@ function contributeEarly(){
   // confirm()は同じ意思決定の重複なので廃止。
   contribute();
 }
+function jcGo(){ui.justContributed=false;ui.awaitReturn=true;setTimeout(refreshBenchResult,400);return true;}
 function markSent(){
   // 送信済みの記録は sentKey に一本化(記録直後パネル経由でも、後日の
   // 送信セクション側の重複抑制が効くように)。mine.sent は互換のため維持。
@@ -1350,6 +1414,13 @@ function markSent(){
   persist();setTimeout(refreshBenchResult,50);
 }
 function dismissContributed(){ui.justContributed=false;refreshBenchResult();}
+function confirmSent(){
+  const m=ensureBench().mine;
+  if(m)ensureBench().sentKey=recKey(m);
+  ui.awaitReturn=false;ui.giveOpen=false;
+  commit(false);refreshBenchResult();
+}
+function returnNotSent(){ui.awaitReturn=false;refreshBenchResult();}
 function exportRecord(){
   const f=ui.bench;const rate=computeRate(f);if(rate==null)return;
   const rec=buildRecord(f,rate);
